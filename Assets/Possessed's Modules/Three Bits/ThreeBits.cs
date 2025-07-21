@@ -38,7 +38,7 @@ public class ThreeBits : MonoBehaviour {
    };
 
    //dont ask
-   private node[] Network = new node[] {
+   private readonly node[] DefaultNetwork = new node[] {
       new node { Name = "AA", EntryDir = new string[] {"AB", "AC", "BA", "CA"}, ExitNode = new string[] {"BB", "CC", "AB", "AC"}, ExitDir = new string[] {"AB", "AC", "BA", "CA"} },
       new node { Name = "AB", EntryDir = new string[] {"BA", "BC", "AB", "CB"}, ExitNode = new string[] {"_B", "_D", "AA", "AC"}, ExitDir = new string[] {"BA", "BC", "AB", "CB"} },
       new node { Name = "AC", EntryDir = new string[] {"CA", "CB", "AC", "BC"}, ExitNode = new string[] {"_C", "_E", "AA", "AB"}, ExitDir = new string[] {"CA", "CB", "AC", "BC"} },
@@ -70,6 +70,10 @@ public class ThreeBits : MonoBehaviour {
       new node { Name = "_B", EntryDir = new string[] {"X"}, ExitNode = new string[] {"AB"}, ExitDir = new string[] {"AB"} }
 
    };
+
+   private node[] Network;     //used for main mod
+   private node[] TestNetwork; //used for checking ambiguous solutions
+
 
    void Awake () { //Avoid doing calculations in here regarding edgework. Just use this for setting up buttons for simplicity.
       ModuleId = ModuleIdCounter++;
@@ -149,7 +153,7 @@ public class ThreeBits : MonoBehaviour {
       State = "QUERYING";
       ModDisplay.text = "WORKING...";
 
-      char[] Outputs = {GetOutput(Queries[0]), GetOutput(Queries[1]), GetOutput(Queries[2]) };
+      char[] Outputs = {GetOutput(Network, Queries[0]), GetOutput(Network, Queries[1]), GetOutput(Network, Queries[2]) };
       
       //shuffle Outputs
       for(int i = 0; i < 2; i++){
@@ -192,28 +196,31 @@ public class ThreeBits : MonoBehaviour {
       ModDisplay.text = "WORKING...";
       State = "SUBMITING";
 
-      HashSet<char> MirrorsHash = new HashSet<char>();
-      HashSet<char> SubHash = new HashSet<char>();
-
-      for(int i = 0; i < 3; i++){
-         MirrorsHash.Add(Mirrors[i]);
-         SubHash.Add(Queries[i]);
-      }
-
       Debug.LogFormat("[Three Bits #{0}] Submitted {1} {2} {3}.", ModuleId, Queries[0], Queries[1], Queries[2]);
-      
-      if(MirrorsHash.SetEquals(SubHash)){
-         StartCoroutine(WaitToSolve());
-      } else {
-         StartCoroutine(WaitToStrike());
+
+      //check if it's an ambiguous solution
+      for(int i = 0; i < 3; i++){
+         ApplyMirror(TestNetwork, Queries[i]);
       }
 
+      for(int i = 0; i < 12; i++){
+         if(GetOutput(Network, HalfAlphabet[i]) != GetOutput(TestNetwork, HalfAlphabet[i])){
+            StartCoroutine(WaitToStrike());
+            return;
+         }
+      }
+
+      Debug.LogFormat("[Three Bits #{0}] That is an acceptable answer!", ModuleId);
+      StartCoroutine(WaitToSolve());
 
    }
 
    void Start () { //Shit that you calculate, usually a majority if not all of the module
       State = "SETUP";
       ModDisplay.text = "STARTING...";
+
+      Network = DefaultNetwork;
+      TestNetwork = DefaultNetwork;
 
       //gen Mirrors
       HashSet<char> MirrorsHash = new HashSet<char>();
@@ -222,48 +229,12 @@ public class ThreeBits : MonoBehaviour {
       }
 
       MirrorsHash.CopyTo(Mirrors);
+
       Debug.LogFormat("[Three Bits #{0}] Generated mirrors: {1} {2} {3}.", ModuleId, Mirrors[0], Mirrors[1], Mirrors[2]);
 
       //apply mirrors
       for(int i = 0; i < 3; i++){
-         switch(Mirrors[i]){
-            case 'C':
-               ShiftNode("AA", false);
-               break;
-            case 'E':
-               ShiftNode("AC", false);
-               break;
-            case 'G':
-               ShiftNode("BC", false);
-               break;
-            case 'J':
-               ShiftNode("BB", true);
-               break;
-            case 'V':
-               ShiftNode("BB", false);
-               break;
-            case 'T':
-               ShiftNode("BA", false);
-               break;
-            case 'Z':
-               ShiftNode("CA", false);
-               break;
-            case 'P':
-               ShiftNode("CC", true);
-               break;
-            case 'K':
-               ShiftNode("CC", false);
-               break;
-            case 'Q':
-               ShiftNode("CB", false);
-               break;
-            case 'D':
-               ShiftNode("AB", false);
-               break;
-            case 'B':
-               ShiftNode("AA", true);
-               break;
-         }
+         ApplyMirror(Network, Mirrors[i]);
       }
 
       State = "IDLE";
@@ -306,13 +277,13 @@ public class ThreeBits : MonoBehaviour {
             Debug.LogFormat("[Three Bits #{0}] Attempted to submit two or more of the same letter! Strike!", ModuleId);
             break;
          case "INCORRECTSUB":
-            Debug.LogFormat("[Three Bits #{0}] Incorrect submission! Strike!", ModuleId);
+            Debug.LogFormat("[Three Bits #{0}] Attempted to submit an answer that does not yield the same input-output pairs! Strike!", ModuleId);
             break;
          case "SOLVED":
             Debug.LogFormat("[Three Bits #{0}] Attempted to press a button when the module was solved! Strike!", ModuleId);
             break;
          default:
-            Debug.LogFormat("[Three Bits #{0}] Something went wrong, I don't know what (Pls ping Possessed)! Code: {1}  Strike!", ModuleId, Reason);
+            Debug.LogFormat("[Three Bits #{0}] Attempted to.. something went wrong? Pls ping Possessed! Code: {1}  Strike!", ModuleId, Reason);
             break;
       }
 
@@ -322,6 +293,8 @@ public class ThreeBits : MonoBehaviour {
       Queries[0] = '_';
       Queries[1] = '_';
       Queries[2] = '_';
+      TestNetwork = DefaultNetwork;
+    
       yield return new WaitForSeconds(0.3f);
 
       if(!ModuleSolved){
@@ -350,18 +323,18 @@ public class ThreeBits : MonoBehaviour {
       Solve();
    }
 
-   char GetOutput (char Query){  
+   char GetOutput (node[] selectedNetwork, char Query){  
       string currentName = "_" + Query;
       string currentDir = "X";
       string nextNode = "_";
       string nextDir = "_";
 
       while(true){
-         for(int i = 0; i < Network.Length; i++){
-            if(Network[i].Name == currentName){
-               if(Network[i].EntryDir.Contains(currentDir)){
-                  nextNode = Network[i].ExitNode[Network[i].EntryDir.ToList().IndexOf(currentDir)];
-                  nextDir = Network[i].ExitDir[Network[i].EntryDir.ToList().IndexOf(currentDir)];
+         for(int i = 0; i < selectedNetwork.Length; i++){
+            if(selectedNetwork[i].Name == currentName){
+               if(selectedNetwork[i].EntryDir.Contains(currentDir)){
+                  nextNode = selectedNetwork[i].ExitNode[selectedNetwork[i].EntryDir.ToList().IndexOf(currentDir)];
+                  nextDir = selectedNetwork[i].ExitDir[selectedNetwork[i].EntryDir.ToList().IndexOf(currentDir)];
                   break;
                } else {
                   return currentName[1];
@@ -374,7 +347,7 @@ public class ThreeBits : MonoBehaviour {
       }
    }
 
-   void ShiftNode(node target, bool special){
+   void ShiftNode(node[] selectedNetwork, node target, bool special){
       char anchor = target.Name[1];
       char[] nonAnchor = "ABC".Replace(anchor.ToString(), "").ToCharArray();
 
@@ -384,12 +357,53 @@ public class ThreeBits : MonoBehaviour {
       }
    }
 
-   void ShiftNode(string targetName, bool special = false){
-      for(int i = 0; i < Network.Length; i++){
-         if(Network[i].Name == targetName){
-            ShiftNode(Network[i], special);
+   void ShiftNode(node[] selectedNetwork, string targetName, bool special = false){
+      for(int i = 0; i < selectedNetwork.Length; i++){
+         if(selectedNetwork[i].Name == targetName){
+            ShiftNode(selectedNetwork, selectedNetwork[i], special);
             return;
          }
+      }
+   }
+
+   void ApplyMirror(node[] selectedNetwork, char mir){
+      switch(mir){
+         case 'C':
+            ShiftNode(selectedNetwork, "AA", false);
+            break;
+         case 'E':
+            ShiftNode(selectedNetwork, "AC", false);
+            break;
+         case 'G':
+            ShiftNode(selectedNetwork, "BC", false);
+            break;
+         case 'J':
+            ShiftNode(selectedNetwork, "BB", true);
+            break;
+         case 'V':
+            ShiftNode(selectedNetwork, "BB", false);
+            break;
+         case 'T':
+            ShiftNode(selectedNetwork, "BA", false);
+            break;
+         case 'Z':
+            ShiftNode(selectedNetwork, "CA", false);
+            break;
+         case 'P':
+            ShiftNode(selectedNetwork, "CC", true);
+            break;
+         case 'K':
+            ShiftNode(selectedNetwork, "CC", false);
+            break;
+         case 'Q':
+            ShiftNode(selectedNetwork, "CB", false);
+            break;
+         case 'D':
+            ShiftNode(selectedNetwork, "AB", false);
+            break;
+         case 'B':
+            ShiftNode(selectedNetwork, "AA", true);
+            break;
       }
    }
 
