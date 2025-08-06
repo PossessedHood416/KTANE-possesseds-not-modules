@@ -94,7 +94,6 @@
      <Compile Include="Assets\Utility Scripts\VoltageMeterReader.cs" />
      <None Include="Assets\TestHarness\Shaders\Outline.shader" />
      <None Include="Assets\TestHarness\_THIS_FOLDER_IS_EXCLUDED_FROM_BUNDLES.txt" />
-     <None Include="Assets\Possessed&apos;s Modules\Roshambo\RSB.txt" />
      <None Include="Assets\TestHarness\Widgets\Shaders\3DText.shader" />
  <Reference Include="UnityEngine.CoreModule">
  <HintPath>C:/Program Files/Unity/Editor/Data/Managed/UnityEngine/UnityEngine.CoreModule.dll</HintPath>
