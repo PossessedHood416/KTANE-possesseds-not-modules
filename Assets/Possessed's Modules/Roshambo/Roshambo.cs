@@ -236,7 +236,7 @@ public class Roshambo : MonoBehaviour {
 		rpwConsid.Add(PickRYB( //plates
 			Bomb.GetPortPlates().Count(x => x.Contains("Parallel") || x.Contains("Serial")),
 			-1,
-			Bomb.GetPortPlates().Count(x => x.Contains("RJ-45") || x.Contains("DVI") || x.Contains("PS2") || x.Contains("StereoRCA"))));
+			Bomb.GetPortPlates().Count(x => x.Contains("RJ45") || x.Contains("DVI") || x.Contains("PS2") || x.Contains("StereoRCA"))));
 
 		rpwConsid.Add(CounterPick(CondensePattern(ContestantList[0].Moves))); //your moves
 

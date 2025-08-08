@@ -71,7 +71,7 @@ MonoBehaviour:
   m_MinSize: {x: 681, y: 492}
   m_MaxSize: {x: 14004, y: 14042}
   vertical: 0
-  controlID: 130
+  controlID: 9
 --- !u!114 &4
 MonoBehaviour:
   m_ObjectHideFlags: 52
@@ -299,19 +299,19 @@ MonoBehaviour:
     m_ShowAllHits: 0
     m_SearchArea: 0
     m_Folders:
-    - Assets/Possessed's Modules/Roshambo/Sounds
+    - Assets/Editor/Resources
   m_ViewMode: 1
   m_StartGridSize: 75
   m_LastFolders:
-  - Assets/Possessed's Modules/Roshambo/Sounds
+  - Assets/Editor/Resources
   m_LastFoldersGridSize: 75
   m_LastProjectPath: D:\Stuff\Github\Possessed's\KTANE-possesseds-not-modules
   m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 168}
-    m_SelectedIDs: f42e0000
-    m_LastClickedID: 12020
-    m_ExpandedIDs: 000000001829000036290000fc290000042b0000282b0000882b0000f42b0000062c0000d62c0000762d0000ce2d00006030000072300000e2310000e63100000232000000ca9a3bffffff7f
+    m_SelectedIDs: 102c0000
+    m_LastClickedID: 11280
+    m_ExpandedIDs: 000000001829000036290000fc290000062b00002a2b00008a2b0000f62b0000082c0000d82c0000782d0000d02d00006230000074300000e4310000e83100000432000000ca9a3bffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -339,7 +339,7 @@ MonoBehaviour:
     scrollPos: {x: 0, y: 0}
     m_SelectedIDs: 
     m_LastClickedID: 0
-    m_ExpandedIDs: 000000001829000036290000fc290000042b0000282b0000882b0000f42b0000062c0000d62c0000762d0000ce2d00006030000072300000e2310000e631000002320000
+    m_ExpandedIDs: 000000001829000036290000fc290000062b00002a2b00008a2b0000f62b0000082c0000d82c0000782d0000d02d00006230000074300000e4310000e831000004320000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
       m_Name: 
@@ -366,7 +366,7 @@ MonoBehaviour:
   m_ListAreaState:
     m_SelectedInstanceIDs: 
     m_LastClickedInstanceID: 0
-    m_HadKeyboardFocusLastEvent: 1
+    m_HadKeyboardFocusLastEvent: 0
     m_ExpandedInstanceIDs: c62300009430000044090000bc3000008a3500005c2d00005a430000fc310000022d0000282c00004629000032430000000000005e090000602d0000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -457,7 +457,7 @@ MonoBehaviour:
   m_PersistentViewDataDictionary: {fileID: 0}
   m_TreeViewState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: d42c0000
+    m_SelectedIDs: 
     m_LastClickedID: 0
     m_ExpandedIDs: 96fbffff00000000
     m_RenameOverlay:
@@ -541,13 +541,13 @@ MonoBehaviour:
       speed: 2
       m_Value: 0
   m_Rotation:
-    m_Target: {x: -0.46189022, y: 0.11776559, z: -0.06203089, w: -0.8768935}
+    m_Target: {x: -0.3860793, y: 0.07597148, z: -0.031923614, w: -0.918778}
     speed: 2
-    m_Value: {x: -0.4618902, y: 0.11776558, z: -0.06203089, w: -0.8768935}
+    m_Value: {x: -0.3860793, y: 0.07597147, z: -0.03192361, w: -0.918778}
   m_Size:
-    m_Target: 0.5044238
+    m_Target: 0.48172474
     speed: 2
-    m_Value: 0.5044238
+    m_Value: 0.48172474
   m_Ortho:
     m_Target: 1
     speed: 2
