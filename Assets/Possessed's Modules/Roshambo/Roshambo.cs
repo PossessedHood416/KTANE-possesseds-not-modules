@@ -299,7 +299,7 @@ public class Roshambo : MonoBehaviour {
 
 	//maybe dont touch ..?
 	IEnumerator SubmitAni () {
-		Debug.LogFormat("[Roshambo #{0}] Entering the tournamnet, good luck!", ModuleId);
+		Debug.LogFormat("[Roshambo #{0}] Entering the tournament, good luck!", ModuleId);
 		MusicCoroutine = StartCoroutine(PlayHomeRun());
 
 		List<int[]> inpAff = new List<int[]>() {
@@ -390,6 +390,11 @@ public class Roshambo : MonoBehaviour {
 		yield return new WaitForSeconds(1.274f);
 
 		MusicCoroutine = null;
+	}
+
+	char GetCurrentInput(){
+		for(int i = 0; i < 3; i++) if(isInputHeldDown[i]) return "RPS"[i];
+		return '-';
 	}
 
 	IEnumerator PlayStrike () {
@@ -489,20 +494,87 @@ public class Roshambo : MonoBehaviour {
 		return CondensePattern(newList);
 	}
 
-	char GetCurrentInput(){
-		for(int i = 0; i < 3; i++) if(isInputHeldDown[i]) return "RPS"[i];
-		return '-';
-	}
-
 	#pragma warning disable 414
-	private readonly string TwitchHelpMessage = @"Use !{0} to do something.";
+	private readonly string TwitchHelpMessage = @"!{0} paper scissors r p s to submit that answer.";
 	#pragma warning restore 414
 
 	IEnumerator ProcessTwitchCommand (string Command) {
+		Command = Command.Trim().ToUpper();
+		string[] Commands = Command.Split(' ');
 		yield return null;
+
+		if(MusicCoroutine != null || AnimationCoroutine != null || StrikeCoroutine != null){
+			yield return "sendtochaterror Please wait for animations to finish.";
+			yield break;
+		}
+
+		if(Commands.Length != 5){
+			yield return "sendtochaterror Expected 5 commands, received " + Commands.Length;
+			yield break;
+		}
+
+		List<char> TPlist = new List<char>();
+		
+		foreach(string cmd in Commands){
+			if(Regex.IsMatch(cmd, @"^R($|OCK)")) TPlist.Add('R'); else
+			if(Regex.IsMatch(cmd, @"^P($|APER)")) TPlist.Add('P'); else
+			if(Regex.IsMatch(cmd, @"^S($|CISSORS)")) TPlist.Add('S'); else {
+				yield return "sendtochaterror Invalid command: " + cmd;
+				yield break;
+			}
+		}
+
+		StartCoroutine(TPinput(TPlist));
 	}
 
 	IEnumerator TwitchHandleForcedSolve () {
 		yield return null;
+
+		if(AnimationCoroutine != null){
+			//mad props if you get here
+			StopCoroutine(AnimationCoroutine);
+			AnimationCoroutine = null;
+		}
+		if(MusicCoroutine != null){
+			StopCoroutine(MusicCoroutine);
+			MusicCoroutine = null;
+		}
+
+		//wait for strike anim to finish
+		while(StrikeCoroutine != null) yield return null;
+
+		//reset mod if autosolver is invoked mid animation
+		for(int i = 0; i < 3; i++){
+			isInputHeldDown[i] = false;
+			InputObjects[i].GetComponent<Renderer>().material = Mats[InputColours[i]];
+		}
+
+		StartCoroutine(TPinput(Solution));
+	}
+
+	IEnumerator TPinput (List<char> moves) {
+		yield return null;
+		List<int> moveInt = moves.Select(x => "RPS".IndexOf(x)).ToList();
+
+		//get started
+		InputKMS[0].OnInteract();
+		InputKMS[0].OnInteractEnded();
+
+		yield return new WaitForSeconds(3.724f);
+
+		float[] timings = {1.345f, 0.267f, 1.241f, 0.259f, 1.165f, 0.196f, 1.110f, 0.224f, 1.138f};
+
+		for(int i = 0; i < timings.Length; i++){
+			if(i % 2 == 0){
+				InputKMS[moveInt[i/2]].OnInteract();
+			} else {
+				InputKMS[moveInt[i/2]].OnInteractEnded();
+			}
+
+			yield return new WaitForSeconds(timings[i]);
+
+			//stop if ya strike
+			if(StrikeCoroutine != null) yield break;
+		}
 	}
 }

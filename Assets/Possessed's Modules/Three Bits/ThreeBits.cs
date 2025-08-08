@@ -38,42 +38,7 @@ public class ThreeBits : MonoBehaviour {
 	};
 
 	//dont ask
-	private readonly Node[] DefaultNetwork = new Node[] {
-		new Node { Name = "AA", EntryDir = new string[] {"AB", "AC", "BA", "CA"}, ExitNode = new string[] {"BB", "CC", "AB", "AC"}, ExitDir = new string[] {"AB", "AC", "BA", "CA"} },
-		new Node { Name = "AB", EntryDir = new string[] {"BA", "BC", "AB", "CB"}, ExitNode = new string[] {"_B", "_D", "AA", "AC"}, ExitDir = new string[] {"BA", "BC", "AB", "CB"} },
-		new Node { Name = "AC", EntryDir = new string[] {"CA", "CB", "AC", "BC"}, ExitNode = new string[] {"_C", "_E", "AA", "AB"}, ExitDir = new string[] {"CA", "CB", "AC", "BC"} },
-
-		new Node { Name = "BA", EntryDir = new string[] {"AB", "AC", "BA", "CA"}, ExitNode = new string[] {"_V", "_T", "BB", "BC"}, ExitDir = new string[] {"AB", "AC", "BA", "CA"} },
-		new Node { Name = "BB", EntryDir = new string[] {"BA", "BC", "AB", "CB"}, ExitNode = new string[] {"AA", "CC", "BA", "BC"}, ExitDir = new string[] {"BA", "BC", "AB", "CB"} },
-		new Node { Name = "BC", EntryDir = new string[] {"CA", "CB", "AC", "BC"}, ExitNode = new string[] {"_G", "_J", "BA", "BB"}, ExitDir = new string[] {"CA", "CB", "AC", "BC"} },
-
-		new Node { Name = "CA", EntryDir = new string[] {"AB", "AC", "BA", "CA"}, ExitNode = new string[] {"_Z", "_P", "CB", "CC"}, ExitDir = new string[] {"AB", "AC", "BA", "CA"} },
-		new Node { Name = "CB", EntryDir = new string[] {"BA", "BC", "AB", "CB"}, ExitNode = new string[] {"_Q", "_K", "CA", "CC"}, ExitDir = new string[] {"BA", "BC", "AB", "CB"} },
-		new Node { Name = "CC", EntryDir = new string[] {"CA", "CB", "AC", "BC"}, ExitNode = new string[] {"AA", "BB", "CA", "CB"}, ExitDir = new string[] {"CA", "CB", "AC", "BC"} },
-
-		new Node { Name = "_C", EntryDir = new string[] {"X"}, ExitNode = new string[] {"AC"}, ExitDir = new string[] {"AC"} },
-		new Node { Name = "_E", EntryDir = new string[] {"X"}, ExitNode = new string[] {"AC"}, ExitDir = new string[] {"BC"} },
-		
-		new Node { Name = "_G", EntryDir = new string[] {"X"}, ExitNode = new string[] {"BC"}, ExitDir = new string[] {"AC"} },
-		new Node { Name = "_J", EntryDir = new string[] {"X"}, ExitNode = new string[] {"BC"}, ExitDir = new string[] {"BC"} },
-
-		new Node { Name = "_V", EntryDir = new string[] {"X"}, ExitNode = new string[] {"BA"}, ExitDir = new string[] {"BA"} },
-		new Node { Name = "_T", EntryDir = new string[] {"X"}, ExitNode = new string[] {"BA"}, ExitDir = new string[] {"CA"} },
-
-		new Node { Name = "_Z", EntryDir = new string[] {"X"}, ExitNode = new string[] {"CA"}, ExitDir = new string[] {"BA"} },
-		new Node { Name = "_P", EntryDir = new string[] {"X"}, ExitNode = new string[] {"CA"}, ExitDir = new string[] {"CA"} },
-
-		new Node { Name = "_K", EntryDir = new string[] {"X"}, ExitNode = new string[] {"CB"}, ExitDir = new string[] {"CB"} },
-		new Node { Name = "_Q", EntryDir = new string[] {"X"}, ExitNode = new string[] {"CB"}, ExitDir = new string[] {"AB"} },
-
-		new Node { Name = "_D", EntryDir = new string[] {"X"}, ExitNode = new string[] {"AB"}, ExitDir = new string[] {"CB"} },
-		new Node { Name = "_B", EntryDir = new string[] {"X"}, ExitNode = new string[] {"AB"}, ExitDir = new string[] {"AB"} }
-
-	};
-
-	private Node[] Network;		//used for main mod
-	private Node[] TestNetwork;	//used for checking ambiguous solutions
-
+	private List<Node> Network = new List<Node>();
 
 	void Awake () { //Avoid doing calculations in here regarding edgework. Just use this for setting up buttons for simplicity.
 		ModuleId = ModuleIdCounter++;
@@ -198,10 +163,15 @@ public class ThreeBits : MonoBehaviour {
 
 		Debug.LogFormat("[Three Bits #{0}] Submitted {1} {2} {3}.", ModuleId, Queries[0], Queries[1], Queries[2]);
 
+		List<Node> TestNetwork = new List<Node>();
+		CopyDefaultNetwork(TestNetwork);
+
 		//check if it's an ambiguous solution
 		for(int i = 0; i < 3; i++){
 			ApplyMirror(TestNetwork, Queries[i]);
 		}
+
+		//if(TestNetwork == DefaultNetwork) Debug.LogFormat("Bruh");
 
 		for(int i = 0; i < 12; i++){
 			if(GetOutput(Network, HalfAlphabet[i]) != GetOutput(TestNetwork, HalfAlphabet[i])){
@@ -219,8 +189,7 @@ public class ThreeBits : MonoBehaviour {
 		State = "SETUP";
 		ModDisplay.text = "STARTING...";
 
-		Network = DefaultNetwork;
-		TestNetwork = DefaultNetwork;
+		CopyDefaultNetwork(Network);
 
 		//gen Mirrors
 		HashSet<char> MirrorsHash = new HashSet<char>();
@@ -293,7 +262,6 @@ public class ThreeBits : MonoBehaviour {
 		Queries[0] = '_';
 		Queries[1] = '_';
 		Queries[2] = '_';
-		TestNetwork = DefaultNetwork;
 	 
 		yield return new WaitForSeconds(0.3f);
 
@@ -323,14 +291,14 @@ public class ThreeBits : MonoBehaviour {
 		Solve();
 	}
 
-	char GetOutput (Node[] selectedNetwork, char Query){
+	char GetOutput (List<Node> selectedNetwork, char Query){
 		string currentName = "_" + Query;
 		string currentDir = "X";
 		string nextNode = "_";
 		string nextDir = "_";
 
 		while(true){
-			for(int i = 0; i < selectedNetwork.Length; i++){
+			for(int i = 0; i < 21; i++){
 				if(selectedNetwork[i].Name == currentName){
 					if(selectedNetwork[i].EntryDir.Contains(currentDir)){
 						nextNode = selectedNetwork[i].ExitNode[selectedNetwork[i].EntryDir.ToList().IndexOf(currentDir)];
@@ -347,7 +315,7 @@ public class ThreeBits : MonoBehaviour {
 		}
 	}
 
-	void ShiftNode(Node[] selectedNetwork, Node target, bool special){
+	void ShiftNode(List<Node> selectedNetwork, Node target, bool special){
 		char anchor = target.Name[1];
 		char[] nonAnchor = "ABC".Replace(anchor.ToString(), "").ToCharArray();
 
@@ -357,8 +325,8 @@ public class ThreeBits : MonoBehaviour {
 		}
 	}
 
-	void ShiftNode(Node[] selectedNetwork, string targetName, bool special = false){
-		for(int i = 0; i < selectedNetwork.Length; i++){
+	void ShiftNode(List<Node> selectedNetwork, string targetName, bool special = false){
+		for(int i = 0; i < 21; i++){
 			if(selectedNetwork[i].Name == targetName){
 				ShiftNode(selectedNetwork, selectedNetwork[i], special);
 				return;
@@ -366,7 +334,7 @@ public class ThreeBits : MonoBehaviour {
 		}
 	}
 
-	void ApplyMirror(Node[] selectedNetwork, char mir){
+	void ApplyMirror(List<Node> selectedNetwork, char mir){
 		switch(mir){
 			case 'C':
 				ShiftNode(selectedNetwork, "AA", false);
@@ -406,6 +374,42 @@ public class ThreeBits : MonoBehaviour {
 				break;
 		}
 	}
+
+	//stupid c# and its quantum entanglement
+	void CopyDefaultNetwork(List<Node> currNetw){
+		currNetw.Clear();
+
+		currNetw.Add(new Node { Name = "AA", EntryDir = new string[] {"AB", "AC", "BA", "CA"}, ExitNode = new string[] {"BB", "CC", "AB", "AC"}, ExitDir = new string[] {"AB", "AC", "BA", "CA"} });
+		currNetw.Add(new Node { Name = "AB", EntryDir = new string[] {"BA", "BC", "AB", "CB"}, ExitNode = new string[] {"_B", "_D", "AA", "AC"}, ExitDir = new string[] {"BA", "BC", "AB", "CB"} });
+		currNetw.Add(new Node { Name = "AC", EntryDir = new string[] {"CA", "CB", "AC", "BC"}, ExitNode = new string[] {"_C", "_E", "AA", "AB"}, ExitDir = new string[] {"CA", "CB", "AC", "BC"} });
+
+		currNetw.Add(new Node { Name = "BA", EntryDir = new string[] {"AB", "AC", "BA", "CA"}, ExitNode = new string[] {"_V", "_T", "BB", "BC"}, ExitDir = new string[] {"AB", "AC", "BA", "CA"} });
+		currNetw.Add(new Node { Name = "BB", EntryDir = new string[] {"BA", "BC", "AB", "CB"}, ExitNode = new string[] {"AA", "CC", "BA", "BC"}, ExitDir = new string[] {"BA", "BC", "AB", "CB"} });
+		currNetw.Add(new Node { Name = "BC", EntryDir = new string[] {"CA", "CB", "AC", "BC"}, ExitNode = new string[] {"_G", "_J", "BA", "BB"}, ExitDir = new string[] {"CA", "CB", "AC", "BC"} });
+
+		currNetw.Add(new Node { Name = "CA", EntryDir = new string[] {"AB", "AC", "BA", "CA"}, ExitNode = new string[] {"_Z", "_P", "CB", "CC"}, ExitDir = new string[] {"AB", "AC", "BA", "CA"} });
+		currNetw.Add(new Node { Name = "CB", EntryDir = new string[] {"BA", "BC", "AB", "CB"}, ExitNode = new string[] {"_Q", "_K", "CA", "CC"}, ExitDir = new string[] {"BA", "BC", "AB", "CB"} });
+		currNetw.Add(new Node { Name = "CC", EntryDir = new string[] {"CA", "CB", "AC", "BC"}, ExitNode = new string[] {"AA", "BB", "CA", "CB"}, ExitDir = new string[] {"CA", "CB", "AC", "BC"} });
+
+		currNetw.Add(new Node { Name = "_C", EntryDir = new string[] {"X"}, ExitNode = new string[] {"AC"}, ExitDir = new string[] {"AC"} });
+		currNetw.Add(new Node { Name = "_E", EntryDir = new string[] {"X"}, ExitNode = new string[] {"AC"}, ExitDir = new string[] {"BC"} });
+		
+		currNetw.Add(new Node { Name = "_G", EntryDir = new string[] {"X"}, ExitNode = new string[] {"BC"}, ExitDir = new string[] {"AC"} });
+		currNetw.Add(new Node { Name = "_J", EntryDir = new string[] {"X"}, ExitNode = new string[] {"BC"}, ExitDir = new string[] {"BC"} });
+
+		currNetw.Add(new Node { Name = "_V", EntryDir = new string[] {"X"}, ExitNode = new string[] {"BA"}, ExitDir = new string[] {"BA"} });
+		currNetw.Add(new Node { Name = "_T", EntryDir = new string[] {"X"}, ExitNode = new string[] {"BA"}, ExitDir = new string[] {"CA"} });
+
+		currNetw.Add(new Node { Name = "_Z", EntryDir = new string[] {"X"}, ExitNode = new string[] {"CA"}, ExitDir = new string[] {"BA"} });
+		currNetw.Add(new Node { Name = "_P", EntryDir = new string[] {"X"}, ExitNode = new string[] {"CA"}, ExitDir = new string[] {"CA"} });
+
+		currNetw.Add(new Node { Name = "_K", EntryDir = new string[] {"X"}, ExitNode = new string[] {"CB"}, ExitDir = new string[] {"CB"} });
+		currNetw.Add(new Node { Name = "_Q", EntryDir = new string[] {"X"}, ExitNode = new string[] {"CB"}, ExitDir = new string[] {"AB"} });
+
+		currNetw.Add(new Node { Name = "_D", EntryDir = new string[] {"X"}, ExitNode = new string[] {"AB"}, ExitDir = new string[] {"CB"} });
+		currNetw.Add(new Node { Name = "_B", EntryDir = new string[] {"X"}, ExitNode = new string[] {"AB"}, ExitDir = new string[] {"AB"} });
+	}
+
 
 #pragma warning disable 414
 	private readonly string TwitchHelpMessage = @"!{0} B G K QUERY P V Z SUBMIT to press those buttons, chainable with spaces.";
