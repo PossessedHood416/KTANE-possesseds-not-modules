@@ -5,12 +5,18 @@ ModelImporter:
   fileIDToRecycleName:
     100000: Paper
     100002: //RootNode
+    100004: default
     400000: Paper
     400002: //RootNode
+    400004: default
     2100000: PaperMat
+    2100002: defaultMat
     2300000: Paper
+    2300002: default
     3300000: Paper
+    3300002: default
     4300000: Paper
+    4300002: default
   externalObjects: {}
   materials:
     importMaterials: 1

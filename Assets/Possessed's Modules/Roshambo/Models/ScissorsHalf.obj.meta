@@ -3,14 +3,14 @@ guid: ff655a5ad6ed8a34cbc4853a6f336043
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
-    100000: ScissorsHalf
+    100000: default
     100002: //RootNode
-    400000: ScissorsHalf
+    400000: default
     400002: //RootNode
-    2100000: ScissorsHalfMat
-    2300000: ScissorsHalf
-    3300000: ScissorsHalf
-    4300000: ScissorsHalf
+    2100000: defaultMat
+    2300000: default
+    3300000: default
+    4300000: default
   externalObjects: {}
   materials:
     importMaterials: 1

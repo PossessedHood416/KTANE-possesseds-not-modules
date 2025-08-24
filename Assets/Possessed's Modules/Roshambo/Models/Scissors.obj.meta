@@ -5,12 +5,18 @@ ModelImporter:
   fileIDToRecycleName:
     100000: Scissors
     100002: //RootNode
+    100004: default
     400000: Scissors
     400002: //RootNode
+    400004: default
     2100000: ScissorsMat
+    2100002: defaultMat
     2300000: Scissors
+    2300002: default
     3300000: Scissors
+    3300002: default
     4300000: Scissors
+    4300002: default
   externalObjects: {}
   materials:
     importMaterials: 1

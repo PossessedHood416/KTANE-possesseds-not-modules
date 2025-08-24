@@ -253,11 +253,10 @@ public class Roshambo : MonoBehaviour {
 		}
 
 		Debug.LogFormat("[Roshambo #{0}] Full seeding of the tournament: {1}", ModuleId, TournSeeding);
-		Debug.LogFormat("[Roshambo #{0}] Furthest up disregarding ties, using R/Y/B based on indicators: {1}", ModuleId, RPS["RPS".IndexOf(FurthestUp)]);
-		Debug.LogFormat("[Roshambo #{0}] Furthest left disregarding ties, using R/Y/B based on indicators: {1}", ModuleId, RPS["RPS".IndexOf(FurthestLeft)]);
+		Debug.LogFormat("[Roshambo #{0}] Furthest up disregarding ties (or Pick RYB off of indicators): {1}", ModuleId, RPS["RPS".IndexOf(FurthestUp)]);
+		Debug.LogFormat("[Roshambo #{0}] Furthest left disregarding ties (or Pick RYB off of indicators): {1}", ModuleId, RPS["RPS".IndexOf(FurthestLeft)]);
 
 		for(int i = 0; i < 4; i++) Debug.LogFormat("[Roshambo #{0}] The tournament after {1} round(s): {2}", ModuleId, i+1, contestantSubsets[i]);
-		Debug.LogFormat("[Roshambo #{0}] (Remember, *=You, !=RPW, -=Special Guest)", ModuleId);
 
 		Debug.LogFormat("[Roshambo #{0}] The Rock Paper Wizard will have played these moves so far: {1}",	ModuleId, String.Join(", ", ContestantList[1].Moves.GetRange(0, 4).Select(c => RPS["RPS".IndexOf(c)]).ToArray()));
 		Debug.LogFormat("[Roshambo #{0}] You will have played these moves so far: {1}",	ModuleId, String.Join(", ", ContestantList[0].Moves.GetRange(0, 4).Select(c => RPS["RPS".IndexOf(c)]).ToArray()));

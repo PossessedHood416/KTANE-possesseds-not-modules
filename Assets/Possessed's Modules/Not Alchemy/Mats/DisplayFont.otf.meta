@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: db24801d8331fcf4eb62c83f23c9b289
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: A Friend In Deed
+  fontNames:
+  - A Friend In Deed
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: ed5ac0d629f011d4e976cb3c72a958e0, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
