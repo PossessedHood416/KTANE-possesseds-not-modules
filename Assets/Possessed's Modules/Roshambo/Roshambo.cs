@@ -462,15 +462,15 @@ public class Roshambo : MonoBehaviour {
 	}
 
 	char PickRYB(int r, int y, int b){
-		int targetClr;
+		int targetClr = 0;
 
 		if(r > y && r > b) targetClr = 2; else
 		if(y > b && y > r) targetClr = 3; else
 		if(b > r && b > y) targetClr = 4; else
+		if(r == y && y == b) targetClr = 3; else
 		if(y == b) targetClr = 2; else
 		if(b == r) targetClr = 3; else
-		if(r == y) targetClr = 4; else
-		targetClr = 3;
+		if(r == y) targetClr = 4;
 
 		for(int i = 0; i < 3; i++){
 			if(InputColours[i] == targetClr) return "RPS"[i];
