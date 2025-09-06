@@ -216,7 +216,7 @@ public class ThreeBits : MonoBehaviour {
 		ModDisplay.text = "✓ ✓ ✓";
 		ModuleSolved = true;
 		GetComponent<KMBombModule>().HandlePass();
-		Audio.PlaySoundAtTransform("3B Solve", SubmitButton.transform);
+		Audio.PlaySoundAtTransform("3B_Solve", SubmitButton.transform);
 	}
 
 	void Strike (string Reason) {

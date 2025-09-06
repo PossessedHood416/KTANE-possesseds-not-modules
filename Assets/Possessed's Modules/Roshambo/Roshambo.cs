@@ -1,4 +1,5 @@
-﻿//this singe script might contain the most unhinged single locs i have ever written
+﻿//No unnaturally long names. No overwhelming number of options. Just a simple game made complex by mind-readers and time-travelers.
+//this singe script might contain the most unhinged single locs i have ever written
 using System;
 using System.Collections;
 using System.Collections.Generic;
