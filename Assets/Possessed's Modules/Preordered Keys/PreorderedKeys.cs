@@ -150,7 +150,20 @@ public class PreorderedKeys : MonoBehaviour {
 		RuleIndex += (UB == UnderButtonKMS[1]) ? 1 : -1;
 
 		if(RuleIndex < 0) RuleIndex = 0;
-		if(RuleIndex >= Rules.Count) Rules.Add(GenNewRule());
+		if(RuleIndex >= Rules.Count){
+			if(Permutations.Count == 1){
+				Strike();
+				return;
+			}
+			Rules.Add(GenNewRule());
+			Debug.LogFormat("[Preordered Keys #{0}] Remaining permutations: {1}.", ModuleId, Permutations.Count);
+
+			List<string[]> permList = new List<string[]>(Permutations);
+			Debug.LogFormat("[Preordered Keys #{0}] Example 1: {1}", ModuleId, string.Join(", ", permList[0].ToArray()));	 
+			Debug.LogFormat("[Preordered Keys #{0}] Example 2: {1}", ModuleId, string.Join(", ", permList[1].ToArray()));	 
+
+
+		}
 
 		UpdateUnderScreen();
 	}
@@ -293,18 +306,18 @@ public class PreorderedKeys : MonoBehaviour {
 		string mid = "";
 		string right = "";
 
-		string[] gateList = new string[] {"<", ">", "↔"}; 
+		string[] gateList = new string[] {"<", ">", "↔", "⇐", "⇒", "-", ":"}; 
 
 		int leftTargetProp = Rnd.Range(0,4);
 		int rightTargetProp = Rnd.Range(0,4);
 
 		//L prop type
-		if(leftTargetProp == 3) left = Rnd.Range(1,7) + "!";
-		else left = KeyStrings[Rnd.Range(0,6)][leftTargetProp] + (leftTargetProp == 2 ? "!" : "");
+		if(leftTargetProp == 3) left = Rnd.Range(1,7) + "";
+		else left = KeyStrings[Rnd.Range(0,6)][leftTargetProp] + (leftTargetProp < 2 ? "!" : "");
 		
 		//R prop type
-		if(rightTargetProp == 3) right = Rnd.Range(1,7) + "!";
-		else right = KeyStrings[Rnd.Range(0,6)][rightTargetProp] + (rightTargetProp == 2 ? "!" : "");
+		if(rightTargetProp == 3) right = Rnd.Range(1,7) + "";
+		else right = KeyStrings[Rnd.Range(0,6)][rightTargetProp] + (rightTargetProp < 2 ? "!" : "");
 
 		//gate
 		mid = gateList[Rnd.Range(0,gateList.Length)];
@@ -313,10 +326,76 @@ public class PreorderedKeys : MonoBehaviour {
 		mid += (Rnd.Range(0,2) == 1) ? "" : "!";
 
 		//check if rule works
-
-		if(false) return GenNewRule();
+		if(!CheckRule(new string[] {left, mid, right})) return GenNewRule();
 		else return new string[] {left, mid, right};
+	}
 
+	bool CheckRule(string[] rule){
+		HashSet<string[]> permuCopy = new HashSet<string[]>();
+
+		foreach(string[] p in Permutations){
+			if(CheckPerm(p, rule)) permuCopy.Add(p);
+		}
+
+		if(permuCopy.Count == 0) return false;
+		Permutations = new HashSet<string[]>(permuCopy);
+		return true;
+	}
+
+	bool CheckPerm(string[] p, string[] r){
+		List<int> leftCandidates = new List<int>(FindCandidate(p, r[0]));
+		List<int> rightCandidates = new List<int>(FindCandidate(p, r[2]));
+
+		bool isGood = false;
+
+		foreach(int l in leftCandidates){ //lazy? very :)
+			switch(r[1][0]){
+				case '<':
+					if(rightCandidates.Contains(l-1)) isGood = true;
+					break;
+				case '>':
+					if(rightCandidates.Contains(l+1)) isGood = true;
+					break;
+				case '↔':
+					if(rightCandidates.Contains(l-1) || rightCandidates.Contains(l+1)) isGood = true;
+					break;
+				case '⇐':
+					if(rightCandidates.Contains(l-2) || rightCandidates.Contains(l-3) || rightCandidates.Contains(l-4) || rightCandidates.Contains(l-5)) isGood = true;
+					break;
+				case '⇒':
+					if(rightCandidates.Contains(l+2) || rightCandidates.Contains(l+3) || rightCandidates.Contains(l+4) || rightCandidates.Contains(l+5)) isGood = true;
+					break;
+				case '-':
+					if(rightCandidates.Contains(l-2) || rightCandidates.Contains(l+2)) isGood = true;
+					break;
+				case ':':
+					if(rightCandidates.Contains(l-3) || rightCandidates.Contains(l+3)) isGood = true;
+					break;
+			}
+		}
+
+		if(r[1].Contains("!")) isGood = !isGood;
+		return isGood;
+	}
+
+	List<int> FindCandidate(string[] p, string r){
+		int propIndex = 0; //color, lab, labc, pos
+		if(Regex.IsMatch(r, "@[1-6]")) propIndex++;
+		if(!r.Contains("!")) propIndex+=2;
+
+		List<int> candiList = new List<int>();
+
+		//copout since only 1 key can have any pos
+		if(propIndex==3){
+			candiList.Add(r[0]);
+			return candiList;
+		}
+
+		for(int i = 0; i < 6; i++){
+			if(p[i][propIndex] == r[0]) candiList.Add(i+1);
+		}
+
+		return candiList;
 	}
 
 	float sigmoidLerp(float i){ return 2.013475894f/(1+Mathf.Pow(2.718281828459f, -7*i)) - 1.0f; } //see 6dsp
