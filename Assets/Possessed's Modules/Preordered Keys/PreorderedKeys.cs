@@ -1,5 +1,5 @@
 //Your order has arrived! It's another Ordered Keys.
-//its so fucking messy :(
+//there are so many horrible locs here
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -40,13 +40,45 @@ public class PreorderedKeys : MonoBehaviour {
 	public TextMesh[] UnderText;
 
 	private bool isModOpen = false;
+	private Coroutine HatchCoroutine = null;
+	private int Phase = 1;
+
 	private string[] KeyStrings = new string[6];
+	private List<string[]> Permutations = new List<string[]>();
+	
 	private int ScreenIndex = 0;
 	private List<string> KeysInDisplay = new List<string>();
-	private HashSet<string[]> Permutations = new HashSet<string[]>();
+
 	private int RuleIndex = 0;
 	private List<string[]> Rules = new List<string[]>();
-	private Coroutine HatchCoroutine = null;
+
+	private string[][] Answers = new string[4][];
+	private int LatePhaseCounter = 0;
+	
+	private string[] Opperators = {"=", "<", ">", "↔", "-", ":", "←", "→"};
+	private int[][] OpOffsets = new int[][] {
+		new int[] {0},					// =
+		new int[] {+1},					// <
+		new int[] {-1},					// >
+		new int[] {-1, +1},				// ↔
+		new int[] {-2, +2},				// -
+		new int[] {-3, +3},				// :
+		new int[] {+5,+4,+3,+2,+1},		// ←
+		new int[] {-5,-4,-3,-2,-1},		// →
+	};
+	
+	//just ship it ffs
+	public class StringArrayComparer : IEqualityComparer<string[]>{
+		public bool Equals(string[] x, string[] y){
+			if (x == null || y == null) return x == y;
+			return x.Length == y.Length && !x.Where((t, i) => !t.Equals(y[i])).Any();
+		}
+
+		public int GetHashCode(string[] obj){
+			if (obj == null) return 0;
+			return obj.Aggregate(0, (hash, item) => hash ^ item.GetHashCode());
+		}
+	}
 
 	void Awake () { //Avoid doing calculations in here regarding edgework. Just use this for setting up buttons for simplicity.
 		ModuleId = ModuleIdCounter++;
@@ -86,17 +118,74 @@ public class PreorderedKeys : MonoBehaviour {
 	}
 
 	void KeyPress (KMSelectable KMS){
-		if(isModOpen){
-			isModOpen = false;
-			HatchCoroutine = StartCoroutine(OpenCloseHatch());
-			return;
+
+		if(KeysInDisplay.Count != 0) return;
+
+		int i = 0;
+		for(; i < 6; i++){
+			if(KeyKMS[i] == KMS) break;
 		}
 		
-		if(KeysInDisplay.Count != 0) return;
-		if(KMS.transform.localPosition.y < 0.005) return;
-		//[!] do not repress key when its in its put-in ani
+		if(Phase == 1){
+			return;
+		} else if(Phase == 2 && isModOpen && KMS.transform.localPosition.y <= 0.001f){
+			KMS.transform.localPosition += new Vector3(0f, 0.01f, 0f);
 
-		KMS.transform.localPosition += new Vector3(0f, -0.01f, 0f);
+			Answers[2][LatePhaseCounter] = Answers[0][i];
+
+			LatePhaseCounter++;
+			if(LatePhaseCounter == 6){
+				Phase = 3;
+				LatePhaseCounter = 0;
+				Debug.LogFormat("[Preordered Keys #{0}] Answer 3: {1}.", ModuleId, string.Join(" ", Answers[2]));
+				
+				//Check ans
+				var comparer = new StringArrayComparer();
+				
+				Debug.LogFormat("[Preordered Keys #{0}] Answer 3 {1} a valid solution.", ModuleId, CheckAns(2) ? "is" : "is not");
+				if(!CheckAns(2)){
+					Strike();
+					return;
+				}
+
+				if(comparer.Equals(Answers[0], Answers[2]) || comparer.Equals(Answers[1], Answers[2])){
+					Debug.LogFormat("[Preordered Keys #{0}] Answer 3 is the same as a previous answer!", ModuleId);
+					Strike();
+					return;
+				}
+
+			}
+
+		} else if (Phase == 3 && !isModOpen && KMS.transform.localPosition.y > 0.005f){
+			KMS.transform.localPosition += new Vector3(0f, -0.01f, 0f);
+			
+			Answers[3][LatePhaseCounter] = Answers[0][i];
+
+			LatePhaseCounter++;
+			if(LatePhaseCounter == 6){
+				Phase = 4;
+				Debug.LogFormat("[Preordered Keys #{0}] Answer 4: {1}.", ModuleId, string.Join(" ", Answers[3]));
+		
+				//Check ans
+				var comparer = new StringArrayComparer();
+				
+				Debug.LogFormat("[Preordered Keys #{0}] Answer 4 {1} a valid solution.", ModuleId, CheckAns(3) ? "is" : "is not");
+				if(!CheckAns(2)){
+					Strike();
+					return;
+				}
+
+				if(comparer.Equals(Answers[0], Answers[3]) || comparer.Equals(Answers[1], Answers[3]) || comparer.Equals(Answers[2], Answers[3])){
+					Debug.LogFormat("[Preordered Keys #{0}] Answer 4 is the same as a previous answer!", ModuleId);
+					Strike();
+					return;
+				}
+
+				Solve();
+			}
+
+		}
+		
 		KMS.AddInteractionPunch(0.1f);
 	}
 
@@ -112,15 +201,19 @@ public class PreorderedKeys : MonoBehaviour {
 			if(SlotKMS[i] == Slot) break;
 		}
 
+		if(Phase != 1) return;
 		if(KeyOBJ[i].activeInHierarchy) return;
 
+		Answers[0][i] = KeysInDisplay[ScreenIndex];
+		Answers[1][6 - KeysInDisplay.Count] = KeysInDisplay[ScreenIndex];
+
 		Slot.AddInteractionPunch(0.1f);
-		Debug.LogFormat("[Preordered Keys #{0}] Placed {1} into position {2}.", ModuleId, KeysInDisplay[ScreenIndex], i+1);
+		//Debug.LogFormat("[Preordered Keys #{0}] Placed {1} into position {2}.", ModuleId, KeysInDisplay[ScreenIndex], i+1);
 
 		SetKeyProp(KeyOBJ[i], KeysInDisplay[ScreenIndex]);
-		KeyOBJ[i].SetActive(true);
-		
 		StartCoroutine(InsertKey(KeyKMS[i]));
+		
+		KeyOBJ[i].SetActive(true);
 		SlotOBJ[i].SetActive(false);
 
 		KeysInDisplay.Remove(KeysInDisplay[ScreenIndex]);
@@ -128,8 +221,34 @@ public class PreorderedKeys : MonoBehaviour {
 		if(KeysInDisplay.Count != 0){
 			ScreenIndex %= KeysInDisplay.Count;
 		} else {
-			StartCoroutine(SecondPhaseAni());
+			Phase = 2;
+			Debug.LogFormat("[Preordered Keys #{0}] All keys placed, moving onto next phase.", ModuleId);
+			Debug.LogFormat("[Preordered Keys #{0}] Answer 1: {1}.", ModuleId, string.Join(" ", Answers[0]));
+			Debug.LogFormat("[Preordered Keys #{0}] Answer 2: {1}.", ModuleId, string.Join(" ", Answers[1]));
+		
+			//Check the answers
+			var comparer = new StringArrayComparer();
+			
+			Debug.LogFormat("[Preordered Keys #{0}] Answer 1 {1} a valid solution.", ModuleId, CheckAns(0) ? "is" : "is not");
+			if(!CheckAns(0)){
+				Strike();
+				return;
+			}
+
+			Debug.LogFormat("[Preordered Keys #{0}] Answer 2 {1} a valid solution.", ModuleId, CheckAns(1) ? "is" : "is not");
+			if(!CheckAns(1)){
+				Strike();
+				return;
+			}
+
+			if(comparer.Equals(Answers[0], Answers[1])){
+				Debug.LogFormat("[Preordered Keys #{0}] Answer 1 is equal to answer 2!", ModuleId);
+				Strike();
+				return;
+			}		
+
 		}
+
 		UpdateScreen();
 	}
 
@@ -147,22 +266,10 @@ public class PreorderedKeys : MonoBehaviour {
 		UB.AddInteractionPunch(0.1f);
 		Audio.PlaySoundAtTransform("PROK_ScreenPress", ScreenButton.transform);
 
-		RuleIndex += (UB == UnderButtonKMS[1]) ? 1 : -1;
-
-		if(RuleIndex < 0) RuleIndex = 0;
-		if(RuleIndex >= Rules.Count){
-			if(Permutations.Count == 1){
-				Strike();
-				return;
-			}
-			Rules.Add(GenNewRule());
-			Debug.LogFormat("[Preordered Keys #{0}] Remaining permutations: {1}.", ModuleId, Permutations.Count);
-
-			List<string[]> permList = new List<string[]>(Permutations);
-			Debug.LogFormat("[Preordered Keys #{0}] Example 1: {1}", ModuleId, string.Join(", ", permList[0].ToArray()));	 
-			Debug.LogFormat("[Preordered Keys #{0}] Example 2: {1}", ModuleId, string.Join(", ", permList[1].ToArray()));	 
-
-
+		if(UB == UnderButtonKMS[0]){ //left
+			RuleIndex = (RuleIndex+Rules.Count-1) % Rules.Count;
+		} else { //right
+			RuleIndex = (RuleIndex+1) % Rules.Count; 
 		}
 
 		UpdateUnderScreen();
@@ -182,26 +289,46 @@ public class PreorderedKeys : MonoBehaviour {
 
 		KeysInDisplay = keyGenHash.ToList();
 		KeyStrings = keyGenHash.ToArray();
+		Answers = Answers.Select(x => new string[6]).ToArray();
 
-		Debug.LogFormat("[Preordered Keys #{0}] Your preorder consists of: {1}", ModuleId, string.Join(", ", KeysInDisplay.ToArray()));	 
-		UpdateScreen();
-
-		foreach(KMSelectable KMS in KeyKMS) KMS.transform.localPosition += new Vector3(0f,0.5f,0f);
+		foreach(KMSelectable KMS in KeyKMS) KMS.transform.localPosition = new Vector3(KMS.transform.localPosition.x, 0.5f, KMS.transform.localPosition.z);
 		foreach(GameObject OBJ in KeyOBJ) OBJ.SetActive(false);
 		foreach(GameObject HL in UnderButtonHL) HL.SetActive(false);
 
-		//add all permutations
+		//add all Permutations
 		for(int i = 0; i < 720; i++) Permutations.Add(Permuto(KeyStrings, i));
+		
+		GenRules();
+		Debug.LogFormat("[Preordered Keys #{0}] Your preorder consists of: {1}", ModuleId, string.Join(", ", KeysInDisplay.ToArray()));	 
 
-		Rules.Add(new string[] {"", "", ""});
+		for(int i = 0; i < Rules.Count; i++){
+			Debug.LogFormat("[Preordered Keys #{0}] Rule #{1}: {2}", ModuleId, i+1, string.Join(" ", Rules[i]));
+		}
+
+		Debug.LogFormat("[Preordered Keys #{0}] Remaining solutions: {1}", ModuleId, Permutations.Distinct().ToList().Count);
+
+		for(int i = 0; i < 4; i++){
+			Debug.LogFormat("[Preordered Keys #{0}] Example solution #{1}: {2}", ModuleId, i+1, string.Join(" ", Permutations[i]));
+		}
+
+		//filt log remaining solutions
+		for(int i = 4; i < Permutations.Count; i++){
+			Debug.LogFormat("<Preordered Keys #{0}> Example solution #{1}: {2}", ModuleId, i+1, string.Join(" ", Permutations[i]));
+		}
+
+		UpdateScreen();
+		UpdateUnderScreen();
 	}
 
 	void Solve () {
 		GetComponent<KMBombModule>().HandlePass();
+		ModuleSolved = true;
 	}
 
 	void Strike () {
 		GetComponent<KMBombModule>().HandleStrike();
+		Debug.LogFormat("[Preordered Keys #{0}] Strike!", ModuleId);
+		SoftReset();
 	}
 
 	IEnumerator InsertKey(KMSelectable Key){
@@ -214,14 +341,6 @@ public class PreorderedKeys : MonoBehaviour {
 			yield return null;
 		}
 		Key.transform.localPosition = new Vector3(x,0,z);
-	}
-
-	IEnumerator SecondPhaseAni(){
-		yield return new WaitForSeconds(1.5f);
-		foreach(KMSelectable KMS in KeyKMS){
-			KMS.transform.localPosition += new Vector3(0f,0.01f,0f);
-		}
-		//[!] sound button release
 	}
 
 	IEnumerator OpenCloseHatch(){
@@ -262,11 +381,6 @@ public class PreorderedKeys : MonoBehaviour {
 	}
 
 	void UpdateUnderScreen(){
-		if(RuleIndex == 0){
-			foreach(TextMesh t in UnderText) t.text = "";
-			return;
-		}
-
 		//red, key label/color
 		//green, key pos/labcol
 		string left = Rules[RuleIndex][0];
@@ -290,123 +404,147 @@ public class PreorderedKeys : MonoBehaviour {
 			string c = arr[j];
 			arr[j] = arr[(i%(6-j))+j];
 			arr[(i%(6-j))+j] = c;
-        }
+		}
 
 		return arr;
 	}
 
-	void Swap(string a, string b){
-		string c = a; a = b; b = c;
+	static float sigmoidLerp(float i){
+		//see 6dsp
+		return 2.013475894f/(1+Mathf.Pow(2.718281828459f, -7*i)) - 1.0f;
 	}
 
-	string[] GenNewRule(){
-		//red, key label/color
-		//green, key pos/labcol
+	void GenRules(){
+		int i = 0;
+		while(Rules.Count < 3 && Permutations.Count > 12 && i < 40){
+			i++;
+			string[] candidate = MakeRule();
+			if(!TestRule(candidate)) continue;
+			Rules.Add(candidate);
+		}
+	}
+
+	string[] MakeRule(){
+		int leftProp = Rnd.Range(0,4);
+		int rightProp = (leftProp+Rnd.Range(1,4))%4;
+
 		string left = "";
-		string mid = "";
 		string right = "";
 
-		string[] gateList = new string[] {"<", ">", "↔", "⇐", "⇒", "-", ":"}; 
+		if(leftProp == 3) left = Rnd.Range(1,7).ToString(); 
+		else left = KeyStrings[Rnd.Range(0,6)][leftProp].ToString();
+		if(leftProp < 2) left += "!";
 
-		int leftTargetProp = Rnd.Range(0,4);
-		int rightTargetProp = Rnd.Range(0,4);
+		if(rightProp == 3) right = Rnd.Range(1,7).ToString();
+		else right = KeyStrings[Rnd.Range(0,6)][rightProp].ToString();
+		if(rightProp < 2) right += "!";
 
-		//L prop type
-		if(leftTargetProp == 3) left = Rnd.Range(1,7) + "";
-		else left = KeyStrings[Rnd.Range(0,6)][leftTargetProp] + (leftTargetProp < 2 ? "!" : "");
-		
-		//R prop type
-		if(rightTargetProp == 3) right = Rnd.Range(1,7) + "";
-		else right = KeyStrings[Rnd.Range(0,6)][rightTargetProp] + (rightTargetProp < 2 ? "!" : "");
+		string mid = Opperators[Rnd.Range(0,Opperators.Length)];
+		mid += Rnd.Range(0,4) == 0 ? "!" : ""; //can i hit this fucking wheel
 
-		//gate
-		mid = gateList[Rnd.Range(0,gateList.Length)];
-		
-		//negate
-		mid += (Rnd.Range(0,2) == 1) ? "" : "!";
-
-		//check if rule works
-		if(!CheckRule(new string[] {left, mid, right})) return GenNewRule();
-		else return new string[] {left, mid, right};
+		return new string[] {left, mid, right};
 	}
 
-	bool CheckRule(string[] rule){
-		HashSet<string[]> permuCopy = new HashSet<string[]>();
+	bool TestRule(string[] rule){
+		//linq is fucking goated
+		HashSet<string[]> subPermu = new HashSet<string[]>(Permutations.Where(x => TestPerm(x, rule)).ToList(), new StringArrayComparer());
 
-		foreach(string[] p in Permutations){
-			if(CheckPerm(p, rule)) permuCopy.Add(p);
-		}
+		if(subPermu.Count == Permutations.Count || subPermu.Count < 12) return false;
 
-		if(permuCopy.Count == 0) return false;
-		Permutations = new HashSet<string[]>(permuCopy);
+		Permutations.Clear();
+		Permutations = new List<string[]>(subPermu);
+		
 		return true;
 	}
 
-	bool CheckPerm(string[] p, string[] r){
-		List<int> leftCandidates = new List<int>(FindCandidate(p, r[0]));
-		List<int> rightCandidates = new List<int>(FindCandidate(p, r[2]));
+	bool TestPerm(string[] perm, string[] rule){
+		List<int> leftCandidates = new List<int>();
+		List<int> rightCandidates = new List<int>();
+		List<int> expectedCandidates = new List<int>();
 
-		bool isGood = false;
+		int leftPropType = (rule[0].Contains("!") ? 0 : 2) + (Regex.IsMatch(rule[0], @"[0-9]") ? 1 : 0);
+		int rightPropType = (rule[2].Contains("!") ? 0 : 2) + (Regex.IsMatch(rule[2], @"[0-9]") ? 1 : 0);
 
-		foreach(int l in leftCandidates){ //lazy? very :)
-			switch(r[1][0]){
-				case '<':
-					if(rightCandidates.Contains(l-1)) isGood = true;
-					break;
-				case '>':
-					if(rightCandidates.Contains(l+1)) isGood = true;
-					break;
-				case '↔':
-					if(rightCandidates.Contains(l-1) || rightCandidates.Contains(l+1)) isGood = true;
-					break;
-				case '⇐':
-					if(rightCandidates.Contains(l-2) || rightCandidates.Contains(l-3) || rightCandidates.Contains(l-4) || rightCandidates.Contains(l-5)) isGood = true;
-					break;
-				case '⇒':
-					if(rightCandidates.Contains(l+2) || rightCandidates.Contains(l+3) || rightCandidates.Contains(l+4) || rightCandidates.Contains(l+5)) isGood = true;
-					break;
-				case '-':
-					if(rightCandidates.Contains(l-2) || rightCandidates.Contains(l+2)) isGood = true;
-					break;
-				case ':':
-					if(rightCandidates.Contains(l-3) || rightCandidates.Contains(l+3)) isGood = true;
-					break;
+		if(leftPropType == 3) leftCandidates.Add(int.Parse(rule[0]));
+		else for(int i = 0; i < 6; i++){
+			if(perm[i][leftPropType] == rule[0][0]) leftCandidates.Add(i+1);
+		}
+
+		if(rightPropType == 3) rightCandidates.Add(int.Parse(rule[2]));
+		else for(int i = 0; i < 6; i++){
+			if(perm[i][rightPropType] == rule[2][0]) rightCandidates.Add(i+1);
+		}
+
+		int opIndex = -1;
+
+		//too lazy to do it another way
+		for(int i = 0; i < Opperators.Length; i++){
+			if(Opperators[i][0] == rule[1][0]){
+				opIndex = i;
+				break;
 			}
 		}
 
-		if(r[1].Contains("!")) isGood = !isGood;
-		return isGood;
-	}
+		// = < > ↔ - : ← →
 
-	List<int> FindCandidate(string[] p, string r){
-		int propIndex = 0; //color, lab, labc, pos
-		if(Regex.IsMatch(r, "@[1-6]")) propIndex++;
-		if(!r.Contains("!")) propIndex+=2;
-
-		List<int> candiList = new List<int>();
-
-		//copout since only 1 key can have any pos
-		if(propIndex==3){
-			candiList.Add(r[0]);
-			return candiList;
+		foreach(int offset in OpOffsets[opIndex]){
+			foreach(int l in leftCandidates){
+				expectedCandidates.Add(l+offset);
+			}
 		}
 
-		for(int i = 0; i < 6; i++){
-			if(p[i][propIndex] == r[0]) candiList.Add(i+1);
-		}
+		bool isPair = expectedCandidates.Intersect(rightCandidates).Count() > 0;
 
-		return candiList;
+		/*
+		Debug.LogFormat("Testing perm {0}", string.Join(" ", perm));
+		Debug.LogFormat("L:{0} || R:{1} || E:{2}",
+			string.Join(" ", leftCandidates.Select(x => x.ToString()).ToArray()),
+			string.Join(" ", rightCandidates.Select(x => x.ToString()).ToArray()),
+			string.Join(" ", expectedCandidates.Select(x => x.ToString()).ToArray()));
+		Debug.LogFormat(isPair ? "Pass." : "Fail.");
+		*/
+
+		return isPair ^ rule[1].Contains("!");
 	}
 
-	float sigmoidLerp(float i){ return 2.013475894f/(1+Mathf.Pow(2.718281828459f, -7*i)) - 1.0f; } //see 6dsp
+	bool CheckAns(int i){
+		var comparer = new StringArrayComparer();
+
+		foreach(string[] c in Permutations){
+			if(comparer.Equals(Answers[i], c))
+				return true;
+		}
+
+		return false;
+	}
+
+	void SoftReset(){
+		Audio.PlaySoundAtTransform("PROK_Spark", ScreenButton.transform);
+
+		Phase = 1;
+		ScreenIndex = 0;
+		KeysInDisplay = new List<string>(KeyStrings);
+
+		Answers = Answers.Select(x => new string[6]).ToArray();
+		LatePhaseCounter = 0;
+
+		foreach(KMSelectable KMS in KeyKMS) KMS.transform.localPosition = new Vector3(KMS.transform.localPosition.x, 0.5f, KMS.transform.localPosition.z);
+		foreach(GameObject OBJ in KeyOBJ) OBJ.SetActive(false);
+		foreach(GameObject OBJ in SlotOBJ) OBJ.SetActive(true);
+
+		UpdateScreen();
+		UpdateUnderScreen();
+
+		Debug.LogFormat("[Preordered Keys #{0}] Resetting...", ModuleId);
+	}
 
 #pragma warning disable 414
 	private readonly string TwitchHelpMessage = @"Use !{0} SOLVE to force solve (unsupported).";
 #pragma warning restore 414
 
 	IEnumerator ProcessTwitchCommand (string Command) {
-		if(Command.ToUpper() == "SOLVE") Solve();
 		yield return null;
+		if(Command.ToUpper() == "SOLVE") Solve();
 	}
 
 	IEnumerator TwitchHandleForcedSolve () {
