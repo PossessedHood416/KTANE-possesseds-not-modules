@@ -321,8 +321,8 @@ public class PreorderedKeys : MonoBehaviour {
 	}
 
 	void Solve () {
-		GetComponent<KMBombModule>().HandlePass();
 		ModuleSolved = true;
+		StartCoroutine(SolveAni());
 	}
 
 	void Strike () {
@@ -333,7 +333,7 @@ public class PreorderedKeys : MonoBehaviour {
 
 	IEnumerator InsertKey(KMSelectable Key){
 		float x = Key.transform.localPosition.x;
-		float y = Key.transform.localPosition.y;
+		float y = 0.5f;
 		float z = Key.transform.localPosition.z;
 		while(y > 0.001f){
 			y *= 0.9f;
@@ -536,6 +536,28 @@ public class PreorderedKeys : MonoBehaviour {
 		UpdateUnderScreen();
 
 		Debug.LogFormat("[Preordered Keys #{0}] Resetting...", ModuleId);
+	}
+
+	IEnumerator SolveAni(){
+		for (int i = 0; i < 30; i++){
+			for (int j = i/5; j < 6; j++)
+				SetKeyProp(KeyOBJ[j], new string( //a bit cursed but whatever, c# was tweaking so it's not my fault
+					new char[] {"RGBCYM"[Rnd.Range(0,6)], "123456"[Rnd.Range(0,6)],  "RGBCYM"[Rnd.Range(0,6)]}
+				));
+
+			if (i % 5 == 4){
+				KeyOBJ[(i - 4) / 5].GetComponent<Renderer>().material.color = new Color(1,1,1);
+				KeyOBJ[(i - 4) / 5].GetComponentInChildren<TextMesh>().color = new Color(0, 0, 0);
+				KeyOBJ[(i - 4) / 5].GetComponentInChildren<TextMesh>().text = "0";	
+			}
+
+			yield return new WaitForSeconds(0.1f);
+		}
+
+		yield return new WaitForSeconds(0.4f);
+
+		GetComponent<KMBombModule>().HandlePass();
+		GetComponent<KMAudio>().PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.CorrectChime, transform);
 	}
 
 #pragma warning disable 414
