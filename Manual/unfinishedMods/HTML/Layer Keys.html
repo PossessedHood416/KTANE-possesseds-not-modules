@@ -1,0 +1,211 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="initial-scale=1">
+	<title>Layer Keys — Keep Talking and Nobody Explodes Module</title>
+	<link rel="stylesheet" type="text/css" href="css/font.css">
+	<link rel="stylesheet" type="text/css" href="css/normalize.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+	<script src="js/ktane-utils.js"></script>
+	<script src='js/ruleseed.js'></script>
+	<script src="js/jquery.3.7.0.min.js"></script>
+	<script src="js/Utilities/svg-utils.js"></script>
+	<style>
+		table {
+			margin: 1em auto;
+		}
+		tr { height: 30px; }
+		td, .dark td {
+			width: 10px;
+			text-align: center;
+			border: 2px solid;
+		}
+		.diamond{
+			transform: rotate(45deg);
+			scale: 90%;
+		}
+		.u-passable, .dark .u-passable{ border-top: none; }
+		.r-passable, .dark .r-passable{ border-right: none; }
+		.d-passable, .dark .d-passable{ border-bottom: none; }
+		.l-passable, .dark .l-passable{ border-left: none; }
+		.maze-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            align-items: center;
+        }
+		.page-footer::before { content: 'Page '; }
+		.page-footer::after { content: ' of 999'; }
+	</style>
+</head>
+<script>
+	//mazegamer
+	function setDefaultRules(rnd){ setRules(rnd); }
+	function setRules(rnd){
+
+		var divgrid = document.getElementsByClassName("maze-grid")[0];
+		let docwrite = ``;
+
+		for(var i = 0; i < 26; i++) {
+			if(i == 24) docwrite +=`<div></div>`;
+			var letter = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i];
+	        docwrite += `<table class="diamond">`;
+            docwrite += `<tr><td></td><td></td><td></td></tr>`;
+            docwrite += `<tr><td></td><td>${letter}</td><td></td></tr>`;
+            docwrite += `<tr><td></td><td></td><td></td></tr>`;
+            docwrite += `</table>`;
+        }
+		divgrid.innerHTML = docwrite;
+
+		var elems = document.getElementsByClassName('diamond');
+		
+		for(var i = 0; i < elems.length; i++){
+			var tempMaze = new maze();
+			makeMaze(tempMaze, rnd);
+			applyMaze(tempMaze, elems[i]);
+		}
+
+	};
+	
+	class cell {
+		constructor(r,c) {
+			this.visited = false;
+			this.row = r;
+			this.col = c;
+			this.walls = {
+				u: true,
+				r: true,
+				d: true,
+				l: true
+			};
+		}
+	}
+
+	class maze {
+		constructor(){
+			this.grid = [];
+			for(let i = 0; i < 3; i++){
+				this.grid[i] = [];
+				for(let j = 0; j < 3; j++){
+					this.grid[i][j] = new cell(i,j);
+				}
+			}
+		}
+	}
+
+	//make maze
+	function getAdj(cell, grid, rnd){
+		let list = [];
+		if (cell.row > 0 && !grid[cell.row - 1][cell.col].visited) list.push(grid[cell.row - 1][cell.col]);
+		if (cell.row < 2 && !grid[cell.row + 1][cell.col].visited) list.push(grid[cell.row + 1][cell.col]);
+		if (cell.col > 0 && !grid[cell.row][cell.col - 1].visited) list.push(grid[cell.row][cell.col - 1]);
+		if (cell.col < 2 && !grid[cell.row][cell.col + 1].visited) list.push(grid[cell.row][cell.col + 1]);
+
+		return list.length == 0 ? null : list[rnd.next(0, list.length)];
+	}
+
+	function combine(a,b){
+		if(a.row - b.row == 1) {a.walls.u = false; b.walls.d = false;}
+		if(a.row - b.row == -1) {a.walls.d = false; b.walls.u = false;}					if(a.row - b.row == 1) {a.walls.u = false; b.walls.d = false;}
+		if(a.col - b.col == 1) {a.walls.l = false; b.walls.r = false;}					if(a.row - b.row == 1) {a.walls.u = false; b.walls.d = false;}
+		if(a.col - b.col == -1) {a.walls.r = false; b.walls.l = false;}
+	}
+	
+	function visitCell(cell, grid, cellStack, rnd){
+		while (cell != null){
+			cell.visited = true;
+			let mazeCell = this.getAdj(cell, grid, rnd);
+			if (mazeCell != null){
+				combine(cell, mazeCell);
+				cellStack.push(cell);
+			} else if (cellStack.length > 0)
+				mazeCell = cellStack.pop();
+			cell = mazeCell;
+		}
+	}
+
+	function makeMaze(mz, rnd){
+		let grid = mz.grid;
+		let x = rnd.next(0, 3);
+		let y = rnd.next(0, 3);
+		visitCell(grid[x][y], grid, [], rnd);
+	}
+	
+	function applyMaze(maze, elem){
+		for(i = 0; i < 9; i++){
+			let r = Math.floor(i/3);
+			let c = i%3;
+			
+			var currentWalls = maze.grid[r][c].walls;
+			var currentCell = elem.rows[r].cells[c];
+			
+			if(!currentWalls.u) currentCell.className += " u-passable";
+			if(!currentWalls.r) currentCell.className += " r-passable";
+			if(!currentWalls.d) currentCell.className += " d-passable";
+			if(!currentWalls.l) currentCell.className += " l-passable";
+		}
+	}
+</script>
+<body>
+	<div class="section">
+		<div class="page page-bg-01">
+			<div class="page-header">
+				<span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+				<span class="page-header-section-title">Layer Keys</span>
+			</div>
+			<div class="page-content">
+				<img src="img/Component/Letter Keys.svg" class="diagram">
+				<h2>On the Subject of Layer Keys</h2>
+				<p class="flavour-text">WE NEED TO GO DEEEEEPEEEEERRRRRR......</p>
+				<ul>
+					<li>This module contains 4 letterd keys and a number display.</li>
+					<li>If the number display is red, you are looking at the wrong manual.</li>
+				</ul>
+				<h3>The First Layer.</h3>
+				<ul>
+					<li>If the serial number contains "A" or "Z" use the first of those two that appears in the serial number.</li>
+					<li>Otherwise, let n = 2.
+						<ul>
+							<li>Add 6*(the reading order position of the A key, 0-indexed).</li>
+							<li>Add 2*(the reading order position of the B key, 0-indexed).</li>
+							<li>If the B key is after the A key, subtract 2.</li>
+							<li>If the C key is after the D key, add 1.</li>
+						</ul>
+					</li>
+					<li>Use the letter that is at position n (A1Z26).</li>
+				</ul>
+
+			</div>
+			<div class="page-footer relative-footer">1</div>
+		</div>
+
+		<div class="page page-bg-02">
+			<div class="page-header">
+				<span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+				<span class="page-header-section-title">Layer Keys</span>
+			</div>
+			<div class="page-content">
+				<div class="maze-grid"></div>
+			</div>
+			<div class="page-footer relative-footer">2</div>
+		</div>
+
+		<div class="page page-bg-03">
+			<div class="page-header">
+				<span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+				<span class="page-header-section-title">Layer Keys</span>
+			</div>
+			<div class="page-content">
+				<h3>Sublevel 1</h3>
+				<p>Calculate the current layer. You spawn in the MM of the maze. Getting to one of the edges of the maze will progress the module to sublevel 2. Take note of which edge does this.</p>
+
+				<h3>Sublevel 2</h3>
+				<p>Take note of the labels of the TM, MR, BM, ML buttons.</p>
+
+			</div>
+			<div class="page-footer relative-footer">3</div>
+		</div>
+
+	</div>
+</body>
+</html>

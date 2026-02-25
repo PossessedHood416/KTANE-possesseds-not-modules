@@ -1,0 +1,243 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="initial-scale=1">
+	<title>Not Alchemy — Keep Talking and Nobody Explodes Module</title>
+	<link rel="stylesheet" type="text/css" href="css/font.css">
+	<link rel="stylesheet" type="text/css" href="css/normalize.css">
+	<link rel="stylesheet" type="text/css" href="css/main.css">
+	<script src="js/ktane-utils.js"></script>
+	<script src='js/ruleseed.js'></script>
+	<script src="js/jquery.3.7.0.min.js"></script>
+	<script src="js/Utilities/svg-utils.js"></script>
+	<style>
+		table { margin: 0 auto; }
+		tr { height: 80px; }
+		td, th, .dark td, .dark th {
+			width: 60px;
+			text-align: center;
+			vertical-align: center;
+		}
+		td { font-size: 80%; }
+		.rotate span {
+			writing-mode: vertical-rl;
+			rotate: 180deg;
+		}
+		.ilegal-adj {
+			width: 70%;
+			height: 70%;
+		}
+		svg circle {
+			stroke: #000;
+			stroke-width: 3px;
+		}
+		svg text {
+			stroke-width: 1;
+			font-size: 21px;
+			text-anchor: middle;
+			stroke: black;
+			fill: black;
+		}
+		.page-footer::before { content: 'Page '; }
+		.page-footer::after { content: ' of 999'; }
+	</style>
+</head>
+<body>
+	<div class="section">
+		<div class="page page-bg-01">
+			<div class="page-header">
+				<span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+				<span class="page-header-section-title">Not Alchemy</span>
+			</div>
+			<div class="page-content">
+				<img src="img/Component/Alchemy.svg" class="diagram">
+				<h2>On the Subject of Not Alchemy</h2>
+				<p class="flavour-text">At some point, wizardry just becomes a game of comboing spells. With that being said, I cast Amen Break ⬇️⬇️↖️⬅️⬆️⬅️⬆️↙️↘️↗️.</p>
+				<p>You are an alchemest who needs to undo the amalgamation of whatever the hell your aprentice has made, and then show them how to correctly make their target creation.</p>
+				<p>On the module is/are...</p>
+				<ul>
+					<li>An emblem in the center of the module.</li>
+					<li>7 elemental buttons with symbols surrounding the center emblem.</li>
+					<li>5 control buttons near the top-left corner.</li>
+					<li>An invert button near the top-middle.</li>
+					<li>A submit button.</li>
+					<li>A redraw button.</li>
+					<li>A display near the top-middle.</li>
+				</ul>
+				<p>To solve the module, you must...</p>
+				<ol>
+					<li>Determine what spells your apprentice has casted</li>
+					<li>Cast spells to undo their mistakes*</li>
+					<li>Correct their spells and cast them*</li>
+				</ol>
+				<p>*You may need to redraw the circle of elements before, during, or after this step.</p>
+				<h3>Determining your Aprentice's Spells</h3>
+				<p>Clicking on one of the control buttons while in positive mode will cause a spell's name to scroll accross the display. If the scrolling text has one vowel changed from that spell, the primary and secondary elements of the spell are swapped. Clicking on a control button while in negative mode will scroll a position onto the display.</p>
+				<p>There is one accidental spell casted. To determine the accidental spell, order the spells by their positions. The accidental spell's primary element is the same as the previous spell's secondary element. The accidental spell's secondary element is the same as the next spell's primary element. This spell will never be the first or last spell.</p>
+			</div>
+			<div class="page-footer relative-footer">1</div>
+		</div>
+		<div class="page page-bg-02">
+			<div class="page-header">
+				<span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+				<span class="page-header-section-title">Not Alchemy</span>
+			</div>
+			<div class="page-content">
+				<h3>Table of Spells</h3>
+				<table>
+					<tr>
+						<td class="rotate"><span>Primary</span></td>
+						<th class="rotate"><span>Pyro</span></th>
+						<th class="rotate"><span>Electro</span></th>
+						<th class="rotate"><span>Hydro</span></th>
+						<th class="rotate"><span>Fortitudo</span></th>
+						<th class="rotate"><span>Toxico</span></th>
+						<th class="rotate"><span>Geo</span></th>
+						<th class="rotate"><span>Anemo</span></th>
+						<th class="rotate"><span>Cryo</span></th>
+					</tr>
+					<tr>
+						<th>Py.</th>
+						<td>-</td>
+						<td>Thunder<br>flare</td>
+						<td>-</td>
+						<td>Inf<br>erno</td>
+						<td>-</td>
+						<td>Magm<br>ation</td>
+						<td>Fire<br>nado</td>
+						<td>-</td>
+					</tr>
+					<tr>
+						<th>El.</th>
+						<td>-</td>
+						<td>-</td>
+						<td>Super<br>Cond<br>uctor</td>
+						<td>Light<br>ning<br>strike</td>
+						<td>Gamma<br>ray</td>
+						<td>Magno<br>field</td>
+						<td>Electro<br>storm</td>
+						<td>Fizzle<br>flake</td>
+					</tr>
+					<tr>
+						<th>Hy.</th>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>Tsu<br>nami</td>
+						<td>Bog<br>swarm</td>
+						<td>Mud<br>slide</td>
+						<td>Rain<br>strom</td>
+						<td>Frigid<br>river</td>
+					</tr>
+					<tr>
+						<th>Fr.</th>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+					</tr>
+					<tr>
+						<th>Tx.</th>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>Radi<br>aiton</td>
+						<td>Poison<br>fog</td>
+						<td>Toxicle</td>
+					</tr>
+					<tr>
+						<th>Ge.</th>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>Rock<br>storm</td>
+						<td>-</td>
+					</tr>
+					<tr>
+						<th>An.</th>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+					</tr>
+					<tr>
+						<th>Cr.</th>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+						<td>-</td>
+					</tr>
+				</table>
+			</div>
+			<div class="page-footer relative-footer">2</div>
+		</div>
+		<div class="page page-bg-03">
+			<div class="page-header">
+				<span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+				<span class="page-header-section-title">Not Alchemy</span>
+			</div>
+			<div class="page-content">
+				<h3>Redrawing the Circle of Elements</h3>
+				<p>The circle of elements on the module notably contains only 7 of the 8 elements. If you must use an element that is not currently in the circle, you must redraw the circle to include that element. The circle can only be redrawn directly after a multiple of 4 inputs have been made, including 0.</p>
+				<p>To enter or exit redraw mode, press redraw. If the module is currently in redraw mode, the text colour and the button colour of the redraw button will be swapped.</p>
+				<p>To redraw the circle, press any element currently on the circle while in redraw mode. This will cause the missing element to replace the swapped element. Be careful, certain elements cannot be adjacent to other elements.</p>
+				<p>An ilegal adjacency occurs when an elemnt is placed next to an element that is adjacent to itself on the diagram. For example, placing Pyro next to Hydro or Cyro creates an ilegal adjacency. If you attempt to make an ilegal adjacency, the module will strike and the elemental swap will not occur.</p>
+				<div>
+					<svg class="ilegal-adj centered-img" viewBox="0 0 670 670" text-anchor="middle">
+						<circle transform="translate(338,083)" r="9.5%" fill="#f3d6ff"/>
+						<circle transform="translate(514,161)" r="9.5%" fill="#ff6be4"/>
+						<circle transform="translate(583,338)" r="9.5%" fill="#99d1f0"/>
+						<circle transform="translate(514,514)" r="9.5%" fill="#ff2626"/>
+						<circle transform="translate(338,583)" r="9.5%" fill="#4d67ff"/>
+						<circle transform="translate(161,514)" r="9.5%" fill="#fff64d"/>
+						<circle transform="translate(083,338)" r="9.5%" fill="#81898f"/>
+						<circle transform="translate(161,161)" r="9.5%" fill="#784d94"/>
+						<text x="338" y="088">Toxico</text>
+						<text x="514" y="166">Anemo</text>
+						<text x="583" y="343">Cryo</text>
+						<text x="514" y="519">Pyro</text>
+						<text x="338" y="588">Hydro</text>
+						<text x="161" y="519">Electro</text>
+						<text x="083" y="343">Geo</text>
+						<text x="161" y="166">Fortitudo</text>
+					</svg>
+				</div>
+			</div>
+			<div class="page-footer relative-footer">3</div>
+		</div>
+		<div class="page page-bg-04">
+			<div class="page-header">
+				<span class="page-header-doc-title">Keep Talking and Nobody Explodes Mod</span>
+				<span class="page-header-section-title">Not Alchemy</span>
+			</div>
+			<div class="page-content">
+				<h3>Determining the Counter Spells</h3>
+				<p>To determine what spells need to be casted to reverse you apprentice's mistakes, take each spell they made and transform it through the flow chart below.</p>
+				<ul>
+					<li>This is the 2nd or 4th spell.</li>
+				</ul>
+				<h3>Deteminigng the Correct Spells</h3>
+			</div>
+			<div class="page-footer relative-footer">4</div>
+		</div>
+	</div>
+</body>
+</html>
