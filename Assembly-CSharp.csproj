@@ -262,10 +262,10 @@
  <HintPath>C:/Program Files/Unity/Hub/Editor/2017.4.22f1/Editor/Data/UnityExtensions/Unity/UnitySpatialTracking/RuntimeEditor/UnityEngine.SpatialTracking.dll</HintPath>
  </Reference>
  <Reference Include="KMFramework">
- <HintPath>C:/Users/dhamm/Documents/GitHub/KTANE-possesseds-not-modules/Assets/Plugins/Managed/KMFramework.dll</HintPath>
+ <HintPath>D:/Stuff/Github/Possessed's/KTANE-possesseds-not-modules/Assets/Plugins/Managed/KMFramework.dll</HintPath>
  </Reference>
  <Reference Include="Newtonsoft.Json">
- <HintPath>C:/Users/dhamm/Documents/GitHub/KTANE-possesseds-not-modules/Assets/Plugins/Managed/Newtonsoft.Json.dll</HintPath>
+ <HintPath>D:/Stuff/Github/Possessed's/KTANE-possesseds-not-modules/Assets/Plugins/Managed/Newtonsoft.Json.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.Analytics">
  <HintPath>C:/Users/dhamm/AppData/Local/Unity/cache/packages/packages.unity.com/com.unity.analytics@2.0.13/UnityEngine.Analytics.dll</HintPath>

@@ -21,14 +21,19 @@
 			text-align: center;
 			border: 2px solid;
 		}
-		.diamond{
+		svg.diamond {
+			transform-origin: center;
 			transform: rotate(45deg);
 			scale: 90%;
 		}
-		.u-passable, .dark .u-passable{ border-top: none; }
-		.r-passable, .dark .r-passable{ border-right: none; }
-		.d-passable, .dark .d-passable{ border-bottom: none; }
-		.l-passable, .dark .l-passable{ border-left: none; }
+		rect.empty { fill: transparent; }
+		rect.wall { fill: #000; }
+		.dark rect.wall {fill: #FFF;}
+		.diamond text {
+			fill: #000;
+			font-size: 50%;
+		}
+		.dark .diamond text { fill: #FFF; }
 		.maze-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -39,32 +44,41 @@
 	</style>
 </head>
 <script>
-	//mazegamer
+	const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	function setDefaultRules(rnd){ setRules(rnd); }
 	function setRules(rnd){
 
+		//make the 26 mazes
 		var divgrid = document.getElementsByClassName("maze-grid")[0];
 		let docwrite = ``;
 
 		for(var i = 0; i < 26; i++) {
 			if(i == 24) docwrite +=`<div></div>`;
-			var letter = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i];
-	        docwrite += `<table class="diamond">`;
-            docwrite += `<tr><td></td><td></td><td></td></tr>`;
-            docwrite += `<tr><td></td><td>${letter}</td><td></td></tr>`;
-            docwrite += `<tr><td></td><td></td><td></td></tr>`;
-            docwrite += `</table>`;
+			var letter = alphabet[i];
+	        docwrite += `<svg class="diamond" viewBox="-15 -5 55 40" ></svg>`;
         }
 		divgrid.innerHTML = docwrite;
 
 		var elems = document.getElementsByClassName('diamond');
-		
 		for(var i = 0; i < elems.length; i++){
 			var tempMaze = new maze();
 			makeMaze(tempMaze, rnd);
-			applyMaze(tempMaze, elems[i]);
+			applyMaze(tempMaze, elems[i], alphabet[i]);
 		}
 
+		var omitX = rnd.next(0,26);
+		var omitY = (omitX + rnd.next(1,26))%26;
+		if(omitX > omitY) [omitX, omitY] = [omitY, omitX];
+
+		var omitXnum =  document.getElementsByClassName("anchor-x");
+		var omitXletter =  document.getElementsByClassName("anchor-x-letter")
+		var omitYnum =  document.getElementsByClassName("anchor-y");
+		var omitYletter =  document.getElementsByClassName("anchor-y-letter");
+
+		for(var i = 0; i < omitXnum.length; i++) omitXnum[i].innerHTML = omitX+1;
+		for(var i = 0; i < omitXletter.length; i++) omitXletter[i].innerHTML = alphabet[omitX];
+		for(var i = 0; i < omitYnum.length; i++) omitYnum[i].innerHTML = omitY+1;
+		for(var i = 0; i < omitYletter.length; i++) omitYletter[i].innerHTML = alphabet[omitY];
 	};
 	
 	class cell {
@@ -106,8 +120,8 @@
 
 	function combine(a,b){
 		if(a.row - b.row == 1) {a.walls.u = false; b.walls.d = false;}
-		if(a.row - b.row == -1) {a.walls.d = false; b.walls.u = false;}					if(a.row - b.row == 1) {a.walls.u = false; b.walls.d = false;}
-		if(a.col - b.col == 1) {a.walls.l = false; b.walls.r = false;}					if(a.row - b.row == 1) {a.walls.u = false; b.walls.d = false;}
+		if(a.row - b.row == -1) {a.walls.d = false; b.walls.u = false;}		if(a.row - b.row == 1) {a.walls.u = false; b.walls.d = false;}
+		if(a.col - b.col == 1) {a.walls.l = false; b.walls.r = false;}		if(a.row - b.row == 1) {a.walls.u = false; b.walls.d = false;}
 		if(a.col - b.col == -1) {a.walls.r = false; b.walls.l = false;}
 	}
 	
@@ -131,19 +145,30 @@
 		visitCell(grid[x][y], grid, [], rnd);
 	}
 	
-	function applyMaze(maze, elem){
-		for(i = 0; i < 9; i++){
-			let r = Math.floor(i/3);
-			let c = i%3;
+	function applyMaze(maze, elem, letter){
+		var payload = "";
+	
+		for(var i = 0; i < 9; i++){
+			var r = Math.floor(i/3);
+			var c = i%3;
+			var cell = maze.grid[r][c];
 			
-			var currentWalls = maze.grid[r][c].walls;
-			var currentCell = elem.rows[r].cells[c];
-			
-			if(!currentWalls.u) currentCell.className += " u-passable";
-			if(!currentWalls.r) currentCell.className += " r-passable";
-			if(!currentWalls.d) currentCell.className += " d-passable";
-			if(!currentWalls.l) currentCell.className += " l-passable";
+			if(cell.walls.u) payload += `<rect class="wall" width="11" height="1" x="${c*10}" y="${r*10}"></rect>`;
+			if(cell.walls.d) payload += `<rect class="wall" width="11" height="1" x="${c*10}" y="${r*10 +10}"></rect>`;
+			if(cell.walls.l) payload += `<rect class="wall" width="1" height="11" x="${c*10}" y="${r*10}"></rect>`;
+			if(cell.walls.r) payload += `<rect class="wall" width="1" height="11" x="${c*10 +10}" y="${r*10}"></rect>`;
 		}
+
+		payload +=`<text x="13" y="18">${letter}</text>`;
+
+		for(var i = 0; i < 9; i++){
+			var r = Math.floor(i/3);
+			var c = i%3;
+			payload += `<rect class="highlightable empty" width="10" height="10" x="${c*10}" y="${r*10}"></rect>`;
+		}
+		
+		
+		elem.innerHTML = payload;
 	}
 </script>
 <body>
@@ -156,23 +181,29 @@
 			<div class="page-content">
 				<img src="img/Component/Letter Keys.svg" class="diagram">
 				<h2>On the Subject of Layer Keys</h2>
-				<p class="flavour-text">WE NEED TO GO DEEEEEPEEEEERRRRRR......</p>
+				<p class="flavour-text">I want to break out of this abstracting pattern of layers but it's <strong>ON</strong>.</p>
 				<ul>
-					<li>This module contains 4 letterd keys and a number display.</li>
-					<li>If the number display is red, you are looking at the wrong manual.</li>
+					<li>This module contains 4 lettered keys and a cycling number display.</li>
+					<li>If the number display is not cycling, you are looking at the wrong manual.</li>
+					<li>Take the four two-digit numbers that are cycling on the number display and concatenate them. <strong>Use this as the ruleseed for the manual.</strong></li>
+					<li>For four sublevels, determine what the sublevel's maze looks like, where the starting and ending positions are, and navigate accordingly.</li>
 				</ul>
-				<h3>The First Layer.</h3>
+				<h3>The Anchor Maze</h3>
+				<p>Every maze the module generates will always have properties drawn form an anchor maze. To find the anchor maze...</p>
 				<ul>
-					<li>If the serial number contains "A" or "Z" use the first of those two that appears in the serial number.</li>
-					<li>Otherwise, let n = 2.
+					<li>If the serial number contains "<span class="anchor-x-letter"></span>" or "<span class="anchor-y-letter"></span>" use the first of those two that appears in the serial number.</li>
+					<li>Otherwise, let n = 1.
 						<ul>
 							<li>Add 6*(the reading order position of the A key, 0-indexed).</li>
 							<li>Add 2*(the reading order position of the B key, 0-indexed).</li>
 							<li>If the B key is after the A key, subtract 2.</li>
 							<li>If the C key is after the D key, add 1.</li>
+							<li>If n is greater than or equal to <span class="anchor-x"></span>, add 1.</li>
+							<li>If n is greater than or equal to <span class="anchor-y"></span>, add 1.</li>
+							<li>Use the letter with the alphabetic position of n (A1Z26).</li>
 						</ul>
 					</li>
-					<li>Use the letter that is at position n (A1Z26).</li>
+					<li>This is the anchor letter, the associated maze can be found on page 2.</li>
 				</ul>
 
 			</div>
@@ -197,7 +228,18 @@
 			</div>
 			<div class="page-content">
 				<h3>Sublevel 1</h3>
-				<p>Calculate the current layer. You spawn in the MM of the maze. Getting to one of the edges of the maze will progress the module to sublevel 2. Take note of which edge does this.</p>
+				<ul>
+					<li>Maze:
+						<ul><li>The maze is identical to the anchor maze.</li></ul>
+					</li>
+					<li>Starting position:
+						<ul><li>The center of the maze.</li></ul>
+					</li>
+					<li>Ending position:
+						<ul><li>One of the four edges of .</li></ul>
+					</li>
+				</ul>
+
 
 				<h3>Sublevel 2</h3>
 				<p>Take note of the labels of the TM, MR, BM, ML buttons.</p>
