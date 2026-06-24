@@ -55,6 +55,8 @@
      <Compile Include="Assets\Boss Mod\Dummy Mod\ExampleModule2.cs" />
      <Compile Include="Assets\Needy Mod\NeedyTemplate.cs" />
      <Compile Include="Assets\Possessed&apos;s Modules\Not Alchemy\NotAlchemy.cs" />
+     <Compile Include="Assets\Possessed&apos;s Modules\Pattern Icosahedron\NetMaker.cs" />
+     <Compile Include="Assets\Possessed&apos;s Modules\Pattern Icosahedron\PatternIcosahedron.cs" />
      <Compile Include="Assets\Possessed&apos;s Modules\Preordered Keys\PreorderedKeys.cs" />
      <Compile Include="Assets\Possessed&apos;s Modules\Roshambo\Roshambo.cs" />
      <Compile Include="Assets\Possessed&apos;s Modules\Three Bits\ThreeBits.cs" />
