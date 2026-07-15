@@ -42,135 +42,135 @@
 		.page-footer::before { content: 'Page '; }
 		.page-footer::after { content: ' of 999'; }
 	</style>
-</head>
-<script>
-	const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	function setDefaultRules(rnd){ setRules(rnd); }
-	function setRules(rnd){
+	<script>
+		const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+		function setDefaultRules(rnd){ setRules(rnd); }
+		function setRules(rnd){
 
-		//make the 26 mazes
-		var divgrid = document.getElementsByClassName("maze-grid")[0];
-		let docwrite = ``;
+			//make the 26 mazes
+			var divgrid = document.getElementsByClassName("maze-grid")[0];
+			let docwrite = ``;
 
-		for(var i = 0; i < 26; i++) {
-			if(i == 24) docwrite +=`<div></div>`;
-			var letter = alphabet[i];
-	        docwrite += `<svg class="diamond" viewBox="-15 -5 55 40" ></svg>`;
-        }
-		divgrid.innerHTML = docwrite;
+			for(var i = 0; i < 26; i++) {
+				if(i == 24) docwrite +=`<div></div>`;
+				var letter = alphabet[i];
+		        docwrite += `<svg class="diamond" viewBox="-15 -5 55 40" ></svg>`;
+	        }
+			divgrid.innerHTML = docwrite;
 
-		var elems = document.getElementsByClassName('diamond');
-		for(var i = 0; i < elems.length; i++){
-			var tempMaze = new maze();
-			makeMaze(tempMaze, rnd);
-			applyMaze(tempMaze, elems[i], alphabet[i]);
+			var elems = document.getElementsByClassName('diamond');
+			for(var i = 0; i < elems.length; i++){
+				var tempMaze = new maze();
+				makeMaze(tempMaze, rnd);
+				applyMaze(tempMaze, elems[i], alphabet[i]);
+			}
+
+			var omitX = rnd.next(0,26);
+			var omitY = (omitX + rnd.next(1,26))%26;
+			if(omitX > omitY) [omitX, omitY] = [omitY, omitX];
+
+			var omitXnum =  document.getElementsByClassName("anchor-x");
+			var omitXletter =  document.getElementsByClassName("anchor-x-letter")
+			var omitYnum =  document.getElementsByClassName("anchor-y");
+			var omitYletter =  document.getElementsByClassName("anchor-y-letter");
+
+			for(var i = 0; i < omitXnum.length; i++) omitXnum[i].innerHTML = omitX+1;
+			for(var i = 0; i < omitXletter.length; i++) omitXletter[i].innerHTML = alphabet[omitX];
+			for(var i = 0; i < omitYnum.length; i++) omitYnum[i].innerHTML = omitY+1;
+			for(var i = 0; i < omitYletter.length; i++) omitYletter[i].innerHTML = alphabet[omitY];
+		};
+		
+		class cell {
+			constructor(r,c) {
+				this.visited = false;
+				this.row = r;
+				this.col = c;
+				this.walls = {
+					u: true,
+					r: true,
+					d: true,
+					l: true
+				};
+			}
 		}
 
-		var omitX = rnd.next(0,26);
-		var omitY = (omitX + rnd.next(1,26))%26;
-		if(omitX > omitY) [omitX, omitY] = [omitY, omitX];
-
-		var omitXnum =  document.getElementsByClassName("anchor-x");
-		var omitXletter =  document.getElementsByClassName("anchor-x-letter")
-		var omitYnum =  document.getElementsByClassName("anchor-y");
-		var omitYletter =  document.getElementsByClassName("anchor-y-letter");
-
-		for(var i = 0; i < omitXnum.length; i++) omitXnum[i].innerHTML = omitX+1;
-		for(var i = 0; i < omitXletter.length; i++) omitXletter[i].innerHTML = alphabet[omitX];
-		for(var i = 0; i < omitYnum.length; i++) omitYnum[i].innerHTML = omitY+1;
-		for(var i = 0; i < omitYletter.length; i++) omitYletter[i].innerHTML = alphabet[omitY];
-	};
-	
-	class cell {
-		constructor(r,c) {
-			this.visited = false;
-			this.row = r;
-			this.col = c;
-			this.walls = {
-				u: true,
-				r: true,
-				d: true,
-				l: true
-			};
-		}
-	}
-
-	class maze {
-		constructor(){
-			this.grid = [];
-			for(let i = 0; i < 3; i++){
-				this.grid[i] = [];
-				for(let j = 0; j < 3; j++){
-					this.grid[i][j] = new cell(i,j);
+		class maze {
+			constructor(){
+				this.grid = [];
+				for(let i = 0; i < 3; i++){
+					this.grid[i] = [];
+					for(let j = 0; j < 3; j++){
+						this.grid[i][j] = new cell(i,j);
+					}
 				}
 			}
 		}
-	}
 
-	//make maze
-	function getAdj(cell, grid, rnd){
-		let list = [];
-		if (cell.row > 0 && !grid[cell.row - 1][cell.col].visited) list.push(grid[cell.row - 1][cell.col]);
-		if (cell.row < 2 && !grid[cell.row + 1][cell.col].visited) list.push(grid[cell.row + 1][cell.col]);
-		if (cell.col > 0 && !grid[cell.row][cell.col - 1].visited) list.push(grid[cell.row][cell.col - 1]);
-		if (cell.col < 2 && !grid[cell.row][cell.col + 1].visited) list.push(grid[cell.row][cell.col + 1]);
+		//make maze
+		function getAdj(cell, grid, rnd){
+			let list = [];
+			if (cell.row > 0 && !grid[cell.row - 1][cell.col].visited) list.push(grid[cell.row - 1][cell.col]);
+			if (cell.row < 2 && !grid[cell.row + 1][cell.col].visited) list.push(grid[cell.row + 1][cell.col]);
+			if (cell.col > 0 && !grid[cell.row][cell.col - 1].visited) list.push(grid[cell.row][cell.col - 1]);
+			if (cell.col < 2 && !grid[cell.row][cell.col + 1].visited) list.push(grid[cell.row][cell.col + 1]);
 
-		return list.length == 0 ? null : list[rnd.next(0, list.length)];
-	}
-
-	function combine(a,b){
-		if(a.row - b.row == 1) {a.walls.u = false; b.walls.d = false;}
-		if(a.row - b.row == -1) {a.walls.d = false; b.walls.u = false;}		if(a.row - b.row == 1) {a.walls.u = false; b.walls.d = false;}
-		if(a.col - b.col == 1) {a.walls.l = false; b.walls.r = false;}		if(a.row - b.row == 1) {a.walls.u = false; b.walls.d = false;}
-		if(a.col - b.col == -1) {a.walls.r = false; b.walls.l = false;}
-	}
-	
-	function visitCell(cell, grid, cellStack, rnd){
-		while (cell != null){
-			cell.visited = true;
-			let mazeCell = this.getAdj(cell, grid, rnd);
-			if (mazeCell != null){
-				combine(cell, mazeCell);
-				cellStack.push(cell);
-			} else if (cellStack.length > 0)
-				mazeCell = cellStack.pop();
-			cell = mazeCell;
+			return list.length == 0 ? null : list[rnd.next(0, list.length)];
 		}
-	}
 
-	function makeMaze(mz, rnd){
-		let grid = mz.grid;
-		let x = rnd.next(0, 3);
-		let y = rnd.next(0, 3);
-		visitCell(grid[x][y], grid, [], rnd);
-	}
-	
-	function applyMaze(maze, elem, letter){
-		var payload = "";
-	
-		for(var i = 0; i < 9; i++){
-			var r = Math.floor(i/3);
-			var c = i%3;
-			var cell = maze.grid[r][c];
+		function combine(a,b){
+			if(a.row - b.row == 1) {a.walls.u = false; b.walls.d = false;}
+			if(a.row - b.row == -1) {a.walls.d = false; b.walls.u = false;}		if(a.row - b.row == 1) {a.walls.u = false; b.walls.d = false;}
+			if(a.col - b.col == 1) {a.walls.l = false; b.walls.r = false;}		if(a.row - b.row == 1) {a.walls.u = false; b.walls.d = false;}
+			if(a.col - b.col == -1) {a.walls.r = false; b.walls.l = false;}
+		}
+		
+		function visitCell(cell, grid, cellStack, rnd){
+			while (cell != null){
+				cell.visited = true;
+				let mazeCell = this.getAdj(cell, grid, rnd);
+				if (mazeCell != null){
+					combine(cell, mazeCell);
+					cellStack.push(cell);
+				} else if (cellStack.length > 0)
+					mazeCell = cellStack.pop();
+				cell = mazeCell;
+			}
+		}
+
+		function makeMaze(mz, rnd){
+			let grid = mz.grid;
+			let x = rnd.next(0, 3);
+			let y = rnd.next(0, 3);
+			visitCell(grid[x][y], grid, [], rnd);
+		}
+		
+		function applyMaze(maze, elem, letter){
+			var payload = "";
+		
+			for(var i = 0; i < 9; i++){
+				var r = Math.floor(i/3);
+				var c = i%3;
+				var cell = maze.grid[r][c];
+				
+				if(cell.walls.u) payload += `<rect class="wall" width="11" height="1" x="${c*10}" y="${r*10}"></rect>`;
+				if(cell.walls.d) payload += `<rect class="wall" width="11" height="1" x="${c*10}" y="${r*10 +10}"></rect>`;
+				if(cell.walls.l) payload += `<rect class="wall" width="1" height="11" x="${c*10}" y="${r*10}"></rect>`;
+				if(cell.walls.r) payload += `<rect class="wall" width="1" height="11" x="${c*10 +10}" y="${r*10}"></rect>`;
+			}
+
+			payload +=`<text x="13" y="18">${letter}</text>`;
+
+			for(var i = 0; i < 9; i++){
+				var r = Math.floor(i/3);
+				var c = i%3;
+				payload += `<rect class="highlightable empty" width="10" height="10" x="${c*10}" y="${r*10}"></rect>`;
+			}
 			
-			if(cell.walls.u) payload += `<rect class="wall" width="11" height="1" x="${c*10}" y="${r*10}"></rect>`;
-			if(cell.walls.d) payload += `<rect class="wall" width="11" height="1" x="${c*10}" y="${r*10 +10}"></rect>`;
-			if(cell.walls.l) payload += `<rect class="wall" width="1" height="11" x="${c*10}" y="${r*10}"></rect>`;
-			if(cell.walls.r) payload += `<rect class="wall" width="1" height="11" x="${c*10 +10}" y="${r*10}"></rect>`;
+			
+			elem.innerHTML = payload;
 		}
-
-		payload +=`<text x="13" y="18">${letter}</text>`;
-
-		for(var i = 0; i < 9; i++){
-			var r = Math.floor(i/3);
-			var c = i%3;
-			payload += `<rect class="highlightable empty" width="10" height="10" x="${c*10}" y="${r*10}"></rect>`;
-		}
-		
-		
-		elem.innerHTML = payload;
-	}
-</script>
+	</script>
+</head>
 <body>
 	<div class="section">
 		<div class="page page-bg-01">
@@ -229,15 +229,26 @@
 			<div class="page-content">
 				<h3>Sublevel 1</h3>
 				<ul>
-					<li>Maze:
-						<ul><li>The maze is identical to the anchor maze.</li></ul>
-					</li>
-					<li>Starting position:
-						<ul><li>The center of the maze.</li></ul>
-					</li>
-					<li>Ending position:
-						<ul><li>One of the four edges of .</li></ul>
-					</li>
+					<li>Maze:<ul>
+						<li>The maze is identical to the anchor maze.</li>
+					</ul></li>
+					<li>Starting position:<ul>
+						<li>The center of the maze.</li>
+					</ul></li>
+					<li>Ending position:<ul>
+						<li>If most of your ports are...<ul>
+							<li>RJ-45 ports, the ending position is the north corner.</li>
+							<li>RCA ports, the ending position is the east corner.</li>
+							<li>PS/2 ports, the ending position is the west corner.</li>
+							<li>DVI-D ports, the ending position is the south corner.</li>
+							<li>Parallel ports, the ending position is the northeast edge.</li>
+							<li>Serial ports, the ending position is the southeast edge.</li>
+							<li>Tied, but the last digit of the serial number is...<ul>
+								<li>Odd, the ending position is the northwest edge</li>
+								<li>Even, the ending position is the southwest edge</li>
+							</ul></li>
+						</ul></li>
+					</ul></li>
 				</ul>
 
 

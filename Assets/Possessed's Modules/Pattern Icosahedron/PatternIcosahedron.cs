@@ -400,7 +400,7 @@ public class PatternIcosahedron : MonoBehaviour {
 	}
 
 #pragma warning disable 414
-	private readonly string TwitchHelpMessage = @"!{0} toggle to toggle the labels/patterns of the triangles. !{0} net 0/1/2/3/4 to show the associated net, where 0 is the main net. !{0} rotate/rota cw/ccw to rotate the selected symbol. !{0} select/place X to place the pattern on tile X.";
+	private readonly string TwitchHelpMessage = @"!{0} toggle to toggle the labels/patterns of the triangles. !{0} net 0/1/2/3/4 to show the associated net, where 0 is the main net. !{0} rotate/rota cw/ccw to rotate the selected pattern. !{0} select/place X to place the pattern on the triangle labeled 'X'.";
 #pragma warning restore 414
 
 	IEnumerator ProcessTwitchCommand (string Command) {
@@ -489,7 +489,7 @@ public class PatternIcosahedron : MonoBehaviour {
 
 		}
 
-		yield return "sendtochaterror Invalid command: " + cmds[1];
+		yield return "sendtochaterror Invalid command: " + cmds[0];
 		yield break;
 
 	}
