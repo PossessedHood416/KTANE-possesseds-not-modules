@@ -425,7 +425,8 @@ public class PatternIcosahedron : MonoBehaviour {
 				if(CurrentDisplay != targetNet) SideTriPress(SideTrisKMS[new int[] {2, 0, 1, 4, 5}[targetNet]]);
 				yield break;
 			} 
-
+			
+			UpdateLabels();
 			yield return "sendtochaterror Invalid net number: " + cmds[1];
 			yield break;
 		} 
