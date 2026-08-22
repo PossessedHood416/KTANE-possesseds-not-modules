@@ -414,6 +414,7 @@ public class PatternIcosahedron : MonoBehaviour {
 			yield break;
 		}
 
+
 		if(cmds[0] == "NET" || cmds[0] == "N"){	
 			if(cmds.Length != 2){
 				yield return "sendtochaterror Please supply the net number and only the net number!";
@@ -423,10 +424,10 @@ public class PatternIcosahedron : MonoBehaviour {
 			if(Regex.IsMatch(cmds[1], @"^[0-4]$")){
 				int targetNet = cmds[1][0] - '0';
 				if(CurrentDisplay != targetNet) SideTriPress(SideTrisKMS[new int[] {2, 0, 1, 4, 5}[targetNet]]);
+				UpdateLabels();
 				yield break;
-			} 
+			}
 			
-			UpdateLabels();
 			yield return "sendtochaterror Invalid net number: " + cmds[1];
 			yield break;
 		} 
@@ -531,7 +532,7 @@ public class PatternIcosahedron : MonoBehaviour {
 
 		yield break;
 	}
-
+	
 	void UpdateLabels() {
 		for(int i = 0; i < 20; i++){
 			GameObject label = TrisOBJ[i].transform.Find("Label").gameObject;
